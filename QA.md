@@ -53,3 +53,10 @@ You asked for it first. It doesn't depend on any other lesson here, and its "pas
 It's given, as on LeetCode (see `harness.js`). Tests write trees as LeetCode's level-order lists, and rep 01/r7 has you write the list → tree builder yourself for local testing.
 
 ## 01 · Binary trees
+
+### Can the BST parts show the tree as a picture?
+*01 · Binary trees · settled 2026-11-06*
+
+Yes. A level-order list like `[5, 4, 6, None, None, 3, 7]` is hard to picture, so the BST parts of lesson 01 now draw it: the Read section (floor's path and a two-child delete), walk w4, break-it b1 (an example and the answer), rep r9, and problems p2 and p10. Each node sits at its inorder position, so a BST reads sorted from left to right; blue marks the path and red marks the node that breaks the rule.
+
+**Changed:** `app.js` draws any `<span class="tree" data-tree="[…]">` as an SVG (optional `data-path`, `data-bad`, `data-cap`), styled in `style.css` for light and dark.

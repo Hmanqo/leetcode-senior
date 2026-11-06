@@ -67,10 +67,13 @@ other side. A <code>while node:</code> loop is enough, with no recursion.</li>
 <li><b>Inorder visits the values sorted.</b> Kth smallest (230), validating (98) and the BST iterator (173) are all
 inorder with a stack (rep 6), stopped early or paused between calls.</li>
 </ul>
+<span class="trees"><span class="tree" data-tree="[8, 4, 12, 2, 6, 10, 14]" data-path="8,12,10" data-cap="Floor of 11: 8 → 12 → 10. The left side is never visited."></span></span>
+<p>The diagrams in this course place each node in its inorder position, so in a BST the values read sorted from left to right.</p>
 <p>Deleting (450) has three cases: no children (return <code>None</code>), one child (return that child), or two
 children (copy in the smallest value on the right, then delete that value from the right subtree). Writing it as
 <code>root.left = delete(root.left, key)</code> means each call returns the new top of its subtree, and the parent's
 link gets fixed for free.</p>
+<span class="trees"><span class="tree" data-tree="[5, 3, 6, 2, 4, None, 7]" data-path="3,4" data-cap="Delete 3: it has two children. The leftmost on its right is 4."></span><span class="tree" data-tree="[5, 4, 6, 2, None, None, 7]" data-path="4" data-cap="4 is copied up, then deleted from the right subtree."></span></span>
 
 <h3>Traps</h3>
 <ol>
@@ -149,7 +152,7 @@ print(levels(tree([3, 9, 20, None, None, 15, 7])))`,
     },
     {
       id: "w4", kind: "walk", title: "Down one path of a BST",
-      prompt: `Find the largest value ≤ 11. Each comparison throws away half of what's left. Watch <code>best</code>: it only changes when you go <b>right</b>, because a node smaller than <code>x</code> is a candidate.`,
+      prompt: `Find the largest value ≤ 11. Each comparison throws away half of what's left. Watch <code>best</code>: it only changes when you go <b>right</b>, because a node smaller than <code>x</code> is a candidate.<span class="trees"><span class="tree" data-tree="[8, 4, 12, 2, 6, 10, 14]" data-cap="floor(root, 11)"></span></span>`,
       code: `def floor(root, x):
     best = None
     node = root
@@ -170,7 +173,7 @@ print(floor(tree([8, 4, 12, 2, 6, 10, 14]), 11))`,
     // ── Break it ────────────────────────────────────────────────────────
     {
       id: "b1", kind: "breakit", title: "A BST checked parent by parent",
-      prompt: `This checks a binary search tree by comparing each node only with its own children. Give a tree (as a LeetCode level-order list) that it calls valid but isn't.`,
+      prompt: `This checks a binary search tree by comparing each node only with its own children. Give a tree (as a LeetCode level-order list) that it calls valid but isn't.<span class="trees"><span class="tree" data-tree="[5, 1, 7, None, None, 6, 8]" data-cap="[5, 1, 7, None, None, 6, 8] is a valid BST."></span></span>`,
       fn: "check", args: "level_order_list",
       code: `def is_bst(node):
     if node is None:
@@ -195,7 +198,7 @@ def check(vals):
       valid: `lambda vals: (isinstance(vals, list) and 1 <= len(vals) <= 15 and type(vals[0]) is int and all(v is None or type(v) is int for v in vals)) or "a level-order list of up to 15 entries (whole numbers or None), starting with a number, like [5, 1, 4, None, None, 3, 6]."`,
       rules: `a level-order list of up to 15 whole numbers or <code>None</code>, starting with a number.`,
       example: `[5, 4, 6, None, None, 3, 7]`,
-      explain: `3 is smaller than its parent 6, so locally it's a fine left child. But it sits in 5's <em>right</em> subtree, where everything must be bigger than 5. Each node has to fit the bounds of <em>all</em> its ancestors, so pass <code>(lo, hi)</code> down (problem p2).`,
+      explain: `3 is smaller than its parent 6, so locally it's a fine left child. But it sits in 5's <em>right</em> subtree, where everything must be bigger than 5. Each node has to fit the bounds of <em>all</em> its ancestors, so pass <code>(lo, hi)</code> down (problem p2).<span class="trees"><span class="tree" data-tree="[5, 4, 6, None, None, 3, 7]" data-path="5,6" data-bad="3" data-cap="3 &lt; 6 is fine locally, but 3 &lt; 5 breaks the root's rule."></span></span>`,
     },
     {
       id: "b2", kind: "breakit", title: "Diameter through the root",
@@ -427,7 +430,7 @@ def level_order(root):
       id: "r9", kind: "rep", title: "Floor in a BST (one path)",
       fn: "bst_floor", sig: "bst_floor(root: TreeNode, x: int) -> int | None",
       adapt: "lambda f, t, x: f(_tree(t), x)",
-      prompt: `<code>root</code> is a BST. Return the largest value ≤ <code>x</code>, or <code>None</code>. Walk one path down with a <code>while</code> loop: no recursion, O(h).`,
+      prompt: `<code>root</code> is a BST. Return the largest value ≤ <code>x</code>, or <code>None</code>. Walk one path down with a <code>while</code> loop: no recursion, O(h).<span class="trees"><span class="tree" data-tree="[8, 4, 12, 2, 6, 10, 14]" data-cap="The tree in the tests."></span></span>`,
       cases: `[
         (([8, 4, 12, 2, 6, 10, 14], 11), 10),
         (([8, 4, 12, 2, 6, 10, 14], 1), None),
@@ -579,7 +582,7 @@ print(levels(tree([1, 2, 3, 4])))`,
     {
       id: "p2", kind: "problem", title: "Validate a BST", leetcode: 98,
       fn: "is_valid_bst", adapt: "lambda f, t: f(_tree(t))",
-      prompt: `Return whether the tree is a strict binary search tree: everything in a node's left subtree is smaller than it, everything in the right subtree is larger.`,
+      prompt: `Return whether the tree is a strict binary search tree: everything in a node's left subtree is smaller than it, everything in the right subtree is larger.<span class="trees"><span class="tree" data-tree="[2, 1, 3]" data-cap="Valid."></span><span class="tree" data-tree="[5, 1, 4, None, None, 3, 6]" data-bad="4" data-cap="Not valid: 4 is right of 5."></span></span>`,
       stub: `def is_valid_bst(root):
     `,
       cases: `[
@@ -597,7 +600,7 @@ print(levels(tree([1, 2, 3, 4])))`,
             return False
         return ok(node.left, lo, node.val) and ok(node.right, node.val, hi)
     return ok(root, float("-inf"), float("inf"))`,
-      note: `Third test: 3 is smaller than its parent 6, but it's in 5's <em>right</em> subtree. Only bounds passed down catch it. Another way: an inorder walk must be strictly increasing.`,
+      note: `Third test: 3 is smaller than its parent 6, but it's in 5's <em>right</em> subtree. Only bounds passed down catch it. Another way: an inorder walk must be strictly increasing.<span class="trees"><span class="tree" data-tree="[5, 4, 6, None, None, 3, 7]" data-path="5,6" data-bad="3" data-cap="Bounds at 3: (5, 6). It fails lo &lt; 3."></span></span>`,
     },
     {
       id: "p3", kind: "problem", title: "Diameter", leetcode: 543,
@@ -804,7 +807,7 @@ def max_width(root):
       id: "p10", kind: "problem", title: "Delete a node in a BST", leetcode: 450,
       fn: "delete_node",
       adapt: "lambda f, t, k: (lambda io: io(io, f(_tree(t), k)))(lambda io, n: io(io, n.left) + [n.val] + io(io, n.right) if n else [])",
-      prompt: `Delete the node with value <code>key</code> (if there is one) and return the root of the BST that's left, in O(h). The tests print the result in inorder, which must be the sorted values without <code>key</code>, so any correct shape passes.`,
+      prompt: `Delete the node with value <code>key</code> (if there is one) and return the root of the BST that's left, in O(h). The tests print the result in inorder, which must be the sorted values without <code>key</code>, so any correct shape passes.<span class="trees"><span class="tree" data-tree="[5, 3, 6, 2, 4, None, 7]" data-cap="The tree in the tests. Deleting 3, 5 or 7 hits each case."></span></span>`,
       stub: `def delete_node(root, key):
     `,
       cases: `[

@@ -46,6 +46,51 @@
   const straight = (s) => s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
   const ASK_MARK = /\s*#\s*ask(?:\s+[\d,\s]+)?:.*$/;
 
+  // ── tree diagrams ────────────────────────────────────────────────────────
+  // Lesson HTML can hold <span class="tree" data-tree="[8, 4, 12]"></span>, a LeetCode
+  // level-order list. Optional: data-path="8,12" (highlighted nodes and the edges between
+  // them), data-bad="3" (marked wrong), data-cap="caption". x = inorder position, so a
+  // BST reads sorted from left to right.
+  function treeSvg(vals, path, bad) {
+    if (!vals.length || vals[0] == null) return `<em>(empty tree)</em>`;
+    const nodes = [{ v: vals[0], d: 0 }];
+    const q = [nodes[0]];
+    for (let i = 1; q.length && i < vals.length; ) {
+      const p = q.shift();
+      for (const side of ["l", "r"]) {
+        if (i < vals.length && vals[i] != null) { const c = { v: vals[i], d: p.d + 1 }; p[side] = c; nodes.push(c); q.push(c); }
+        i++;
+      }
+    }
+    let x = 0;
+    const place = (n) => { if (!n) return; place(n.l); n.x = x++; place(n.r); };
+    place(nodes[0]);
+    const R = 15, DX = 36, DY = 52, PAD = 4;
+    const depth = Math.max(...nodes.map((n) => n.d));
+    const W = (x - 1) * DX + 2 * (R + PAD), H = depth * DY + 2 * (R + PAD);
+    const cx = (n) => n.x * DX + R + PAD, cy = (n) => n.d * DY + R + PAD;
+    const on = (n) => path.has(String(n.v));
+    let edges = "", circles = "";
+    for (const n of nodes) for (const c of [n.l, n.r]) if (c) {
+      edges += `<line x1="${cx(n)}" y1="${cy(n)}" x2="${cx(c)}" y2="${cy(c)}" class="${on(n) && on(c) ? "on" : ""}"/>`;
+    }
+    for (const n of nodes) {
+      const cls = bad.has(String(n.v)) ? "bad" : on(n) ? "on" : "";
+      circles += `<g class="${cls}"><circle cx="${cx(n)}" cy="${cy(n)}" r="${R}"/><text x="${cx(n)}" y="${cy(n)}">${esc(n.v)}</text></g>`;
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="tree ${esc(JSON.stringify(vals))}">${edges}${circles}</svg>`;
+  }
+  function drawTrees(root) {
+    root.querySelectorAll(".tree:not([data-drawn])").forEach((el) => {
+      el.dataset.drawn = "1";
+      const set = (s) => new Set((s || "").split(",").map((t) => t.trim()).filter(Boolean));
+      let vals;
+      try { vals = JSON.parse(el.dataset.tree.replace(/None/g, "null")); } catch { return; }
+      el.innerHTML = treeSvg(vals, set(el.dataset.path), set(el.dataset.bad)) + (el.dataset.cap ? `<span class="tree-cap">${el.dataset.cap}</span>` : "");
+    });
+  }
+  new MutationObserver(() => drawTrees(document)).observe(document.documentElement, { childList: true, subtree: true });
+
   // ── Python in a worker (so an infinite loop can be killed) ───────────────
   function workerMain() {
     let py = null;

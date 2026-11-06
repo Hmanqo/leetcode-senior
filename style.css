@@ -166,3 +166,16 @@ details.sol summary { cursor: pointer; color: var(--accent); }
   .side { position: static; max-height: 200px; }
   .top { padding: 10px 16px; }
 }
+
+/* tree diagrams (drawn by app.js from <span class="tree" data-tree="[...]">) */
+.trees { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: flex-end; margin: 10px 0; }
+.tree { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; margin: 6px 0; max-width: 100%; vertical-align: top; }
+.tree svg { max-width: 100%; height: auto; overflow: visible; }
+.tree line { stroke: var(--muted); stroke-width: 1.5; }
+.tree line.on { stroke: var(--accent); stroke-width: 3; }
+.tree circle { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+.tree text { fill: var(--ink); font: 600 13px var(--mono); text-anchor: middle; dominant-baseline: central; }
+.tree .on circle { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+.tree .bad circle { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2.5; }
+.tree .bad text { fill: var(--bad); }
+.tree-cap { font-size: 13px; color: var(--muted); text-align: center; }
