@@ -68,6 +68,156 @@ interviewer wants to hear which cut you'd add.</li>
 `,
 
   exercises: [
+    // ── Step through ────────────────────────────────────────────────────
+    {
+      id: "w1", kind: "walk", title: "The subset tree: choose, explore, undo",
+      prompt: `Every call records <code>path</code>, then tries each later item: append, recurse, pop. Watch the call boxes stack up as the path grows, and see the path jump back after <code>[1, 2, 3]</code>.`,
+      code: `out, path = [], []
+
+def go(start, items):
+    out.append(path[:])  # ask 4,5,6: path
+    for i in range(start, len(items)):
+        path.append(items[i])
+        go(i + 1, items)
+        path.pop()
+
+go(0, [1, 2, 3])
+print(out)`,
+      note: `After <code>[1, 2, 3]</code> the 3 is popped, then the 2 is popped, and the loop one level up moves on to 3, giving <code>[1, 3]</code>. The pops are what let the next branch start from the right state. Every call is a node of the choice tree, and every node is a subset.`,
+    },
+    {
+      id: "w2", kind: "walk", title: "Skip repeats at the same level",
+      prompt: `<code>[1, 2, 2]</code> sorted. At each level, a value is tried once: a second 2 is skipped if it's not the first choice <em>at this level</em> (<code>i &gt; start</code>). Each question comes when a skip happens.`,
+      code: `def unique_subsets(nums):
+    nums.sort()
+    out, path = [], []
+    def go(start):
+        out.append(path[:])
+        for i in range(start, len(nums)):
+            if i > start and nums[i] == nums[i - 1]:
+                continue  # ask: (start, i, path)
+            path.append(nums[i])
+            go(i + 1)
+            path.pop()
+    go(0)
+    return out
+
+print(unique_subsets([1, 2, 2]))`,
+      note: `Both skips happen after a 2 was already tried at that level (once below [1], once at the top). The second 2 still gets used one level deeper, as in <code>[2, 2]</code>, because there it's the first choice (<code>i == start</code>). With <code>i &gt; 0</code> instead, <code>[2, 2]</code> would be lost (Break it b1).`,
+    },
+    {
+      id: "w3", kind: "walk", title: "Prune with break",
+      prompt: `Make 7 from <code>[2, 3, 5]</code>, reusing parts. Parts are sorted, so once a part is bigger than what's <code>left</code>, every later part is too, and the whole rest of the loop is cut.`,
+      code: `def make_total(parts, total):
+    parts.sort()
+    out, path = [], []
+    def go(start, left):
+        if left == 0:
+            out.append(path[:])
+            return
+        for i in range(start, len(parts)):
+            if parts[i] > left:
+                break  # ask 1,2,3: (path, left, parts[i])
+            path.append(parts[i])
+            go(i, left - parts[i])
+            path.pop()
+    go(0, total)
+    return out
+
+print(make_total([2, 3, 5], 7))`,
+      note: `Each <code>break</code> cuts a whole subtree before it's visited, which is where backtracking's speed comes from. <code>go(i, …)</code> lets a part repeat but never goes back to an earlier one, so <code>[2, 5]</code> and <code>[5, 2]</code> can't both appear.`,
+    },
+
+    // ── Break it ────────────────────────────────────────────────────────
+    {
+      id: "b1", kind: "breakit", title: "Skip with i > 0",
+      prompt: `Distinct subsets of a list with repeats, but the skip test is <code>i &gt; 0</code> instead of <code>i &gt; start</code>. Find a list where a subset goes missing.`,
+      fn: "unique_subsets", args: "nums",
+      code: `def unique_subsets(nums):
+    nums = sorted(nums)
+    out, path = [], []
+    def go(start):
+        out.append(path[:])
+        for i in range(start, len(nums)):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            path.append(nums[i])
+            go(i + 1)
+            path.pop()
+    go(0)
+    return sorted(out)`,
+      ref: "right",
+      right: `def right(nums):
+    from itertools import combinations
+    s = sorted(nums)
+    return sorted(list(c) for c in {c for r in range(len(s) + 1) for c in combinations(s, r)})`,
+      valid: `lambda nums: (isinstance(nums, list) and len(nums) <= 6 and all(type(x) is int and 0 <= x <= 9 for x in nums)) or "a list of up to 6 whole numbers from 0 to 9."`,
+      rules: `a list of up to 6 whole numbers from 0 to 9.`,
+      example: `[2, 2]`,
+      explain: `At the level below <code>[2]</code>, the second 2 is the <em>first</em> choice there, and it should be allowed. <code>i &gt; 0</code> skips it anyway, because it only checks the value before it, not whether that value was tried at this level. So <code>[2, 2]</code> is never built.`,
+    },
+    {
+      id: "b2", kind: "breakit", title: "A missing undo",
+      prompt: `All orderings with a <code>used</code> list, but <code>used[i]</code> is never set back to False. Find a list where orderings go missing.`,
+      fn: "orderings", args: "items",
+      code: `def orderings(items):
+    out, path = [], []
+    used = [False] * len(items)
+    def go():
+        if len(path) == len(items):
+            out.append(path[:])
+            return
+        for i in range(len(items)):
+            if used[i]:
+                continue
+            used[i] = True
+            path.append(items[i])
+            go()
+            path.pop()
+    go()
+    return sorted(out)`,
+      ref: "right",
+      right: `def right(items):
+    from itertools import permutations
+    return sorted(list(p) for p in permutations(items))`,
+      valid: `lambda items: (isinstance(items, list) and len(items) <= 5 and len(set(items)) == len(items) and all(type(x) is int for x in items)) or "up to 5 different whole numbers."`,
+      rules: `up to 5 different whole numbers.`,
+      example: `[1, 2]`,
+      explain: `The path is undone but <code>used</code> isn't, so after the first ordering every item stays marked used and no other branch can start. Every piece of state you change on the way down needs its own undo on the way up.`,
+    },
+    {
+      id: "b3", kind: "breakit", title: "A cell never restored",
+      prompt: `Count paths from the top-left to the bottom-right of a grid without revisiting a cell. The cell is marked <code>"#"</code> while the path is on it, but never set back. Find a grid where it undercounts.`,
+      fn: "count_paths", args: "grid",
+      code: `def count_paths(grid):
+    rows, cols = len(grid), len(grid[0])
+    def go(r, c):
+        if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] != ".":
+            return 0
+        if (r, c) == (rows - 1, cols - 1):
+            return 1
+        grid[r][c] = "#"
+        return go(r + 1, c) + go(r - 1, c) + go(r, c + 1) + go(r, c - 1)
+    return go(0, 0)`,
+      ref: "right",
+      right: `def right(grid):
+    rows, cols = len(grid), len(grid[0])
+    def go(r, c):
+        if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] != ".":
+            return 0
+        if (r, c) == (rows - 1, cols - 1):
+            return 1
+        grid[r][c] = "#"
+        total = go(r + 1, c) + go(r - 1, c) + go(r, c + 1) + go(r, c - 1)
+        grid[r][c] = "."
+        return total
+    return go(0, 0)`,
+      valid: `lambda g: (isinstance(g, list) and 1 <= len(g) <= 3 and all(isinstance(row, list) and len(row) == len(g[0]) and 1 <= len(row) <= 3 and all(c in (".", "#") for c in row) for row in g)) or "a grid of 1 to 3 rows and 1 to 3 columns of \\".\\" and \\"#\\"."`,
+      rules: `1–3 rows and 1–3 columns of <code>"."</code> and <code>"#"</code>.`,
+      example: `[[".", ".", "."], [".", ".", "."]]`,
+      explain: `The first path to finish leaves its cells marked, so later paths that need the middle cells find them blocked. (In a 2 × 2 grid the two paths share no cell that needs restoring, so it survives that one.) That's right for "can I reach it?" (dicti's grid search) and wrong for "how many paths?": here each path needs the cells back.`,
+    },
+
     // ── Reps ────────────────────────────────────────────────────────────
     {
       id: "r1", kind: "rep", title: "All subsets (loop from start)",
