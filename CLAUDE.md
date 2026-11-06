@@ -1,0 +1,11 @@
+# senior: senior-level LeetCode patterns
+
+The user is drilling the patterns behind harder LeetCode mediums and hards, one skill per lesson, until each is fast and automatic. `README.md` is the approved spec and lists the 14 lessons. The sibling courses are the model: `../dicti` (same app, same format) and `../claude_leetcode_help` (linked lists). Neither course's topics are repeated here.
+
+- **Python only**, typed in the browser with no autocomplete. Every exercise runs real Python via Pyodide in a Web Worker (`app.js`). Tests are Python literals in the lesson data file.
+- **Trees:** `harness.js` provides `TreeNode`, `tree(list)`, `tree_list(root)` and `find(root, val)`, as LeetCode would. Tests write trees as LeetCode level-order lists, and an exercise's `adapt` lambda (`lambda f, *args`) converts arguments and results, using `_tree`, `_tree_list` and `_find` so a user's variable can't shadow them.
+- **One lesson = one file** in `lessons/`, registered with `COURSE.lesson({...})` and added as a `<script>` in `index.html`. `lessons/01-tree-recursion.js` is the reference for format and tone. Build one lesson at a time, only when asked.
+- **Verify every exercise:** each rep's and problem's `solution` must pass its own `cases`, each stub must fail, each predict snippet's real output must match its explanation, each walk's printed asks must match its prompt and note, and each break-it's `example` must break it. Run `node tools/check.mjs` after any lesson change.
+- **Understanding first:** each lesson opens with *Step through* walks (`kind: "walk"`, questions marked `# ask: expr` or `# ask 1,3: expr` in the code) and *Break it* (`kind: "breakit"`: a plausible wrong `code`, a correct `right`, a `valid` lambda for inputs and an `example`). Use them for the ideas that are easy to type and hard to understand. A walk can cover a rep's code, but never a problem's.
+- Everything stays on the computer: computing names, no real-world lenses. LeetCode problems appear as "Problems" and as the cold list; reps are generic drills.
+- **Questions go in `QA.md`**, following the rules at its top, updated in the same turn.
