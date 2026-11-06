@@ -167,6 +167,66 @@ print(floor(tree([8, 4, 12, 2, 6, 10, 14]), 11))`,
       note: `Four nodes looked at out of seven. In a balanced BST that's O(log n), because the 4, 2 and 6 side was never touched. Going left never sets <code>best</code>: a node bigger than <code>x</code> can't be a floor.`,
     },
 
+    // ── Break it ────────────────────────────────────────────────────────
+    {
+      id: "b1", kind: "breakit", title: "A BST checked parent by parent",
+      prompt: `This checks a binary search tree by comparing each node only with its own children. Give a tree (as a LeetCode level-order list) that it calls valid but isn't.`,
+      fn: "check", args: "level_order_list",
+      code: `def is_bst(node):
+    if node is None:
+        return True
+    if node.left and node.left.val >= node.val:
+        return False
+    if node.right and node.right.val <= node.val:
+        return False
+    return is_bst(node.left) and is_bst(node.right)
+
+def check(vals):
+    return is_bst(tree(vals))`,
+      ref: "right",
+      right: `def right(vals):
+    def ok(node, lo, hi):
+        if node is None:
+            return True
+        if not (lo < node.val < hi):
+            return False
+        return ok(node.left, lo, node.val) and ok(node.right, node.val, hi)
+    return ok(tree(vals), float("-inf"), float("inf"))`,
+      valid: `lambda vals: (isinstance(vals, list) and 1 <= len(vals) <= 15 and type(vals[0]) is int and all(v is None or type(v) is int for v in vals)) or "a level-order list of up to 15 entries (whole numbers or None), starting with a number, like [5, 1, 4, None, None, 3, 6]."`,
+      rules: `a level-order list of up to 15 whole numbers or <code>None</code>, starting with a number.`,
+      example: `[5, 4, 6, None, None, 3, 7]`,
+      explain: `3 is smaller than its parent 6, so locally it's a fine left child. But it sits in 5's <em>right</em> subtree, where everything must be bigger than 5. Each node has to fit the bounds of <em>all</em> its ancestors, so pass <code>(lo, hi)</code> down (problem p2).`,
+    },
+    {
+      id: "b2", kind: "breakit", title: "Diameter through the root",
+      prompt: `This measures the longest path (in edges) as left height + right height <b>at the root</b>. Give a tree where the longest path doesn't go through the root.`,
+      fn: "check", args: "level_order_list",
+      code: `def height(node):
+    if node is None:
+        return 0
+    return 1 + max(height(node.left), height(node.right))
+
+def check(vals):
+    root = tree(vals)
+    return height(root.left) + height(root.right)`,
+      ref: "right",
+      right: `def right(vals):
+    best = 0
+    def h(node):
+        nonlocal best
+        if node is None:
+            return 0
+        l, r = h(node.left), h(node.right)
+        best = max(best, l + r)
+        return 1 + max(l, r)
+    h(tree(vals))
+    return best`,
+      valid: `lambda vals: (isinstance(vals, list) and 1 <= len(vals) <= 15 and type(vals[0]) is int and all(v is None or type(v) is int for v in vals)) or "a level-order list of up to 15 entries (whole numbers or None), starting with a number."`,
+      rules: `a level-order list of up to 15 whole numbers or <code>None</code>, starting with a number.`,
+      example: `[1, 2, None, 3, 4, 5, None, None, 6]`,
+      explain: `The longest path bends at node 2, going down both of its sides, and never touches the root. The best path can bend at any node, so check <code>l + r</code> at every node and keep the best on the side (rep 5 and problem p3).`,
+    },
+
     // ── Reps ────────────────────────────────────────────────────────────
     {
       id: "r1", kind: "rep", title: "Size (return up)",

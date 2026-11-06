@@ -38,7 +38,7 @@ Greedy was the one big gap, so it became lesson 09 and everything after it moved
 ### How do the "Step through" and "Break it" sections work?
 *Whole course · settled 2026-11-05*
 
-They were added for understanding rather than speed. **Step through** runs the code line by line in real Python, with a box per waiting call, and pauses at lines marked `# ask: expr` until you say what `expr` is. **Edit the code** lets you trace your own version. **Break it** shows a plausible wrong solution, and you type an input where it disagrees with a hidden correct one. Lessons 01 and 09 have them so far.
+They were added for understanding rather than speed. **Step through** runs the code line by line in real Python, with a box per waiting call, and pauses at lines marked `# ask: expr` until you say what `expr` is. **Edit the code** lets you trace your own version. **Break it** shows a plausible wrong solution, and you type an input where it disagrees with a hidden correct one. Every lesson has them (lesson 14's walk through brute-force code to practise spotting which tool removes the repeated work).
 
 **Changed:** `_walk` and `_breakit` in `harness.js`, `renderWalk` and `renderBreak` in `app.js`, and `tools/check.mjs` now verifies both kinds.
 
