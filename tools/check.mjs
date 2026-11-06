@@ -59,7 +59,7 @@ for j in jobs:
         # The asks are printed so they can be checked against the prompt.
         r = json.loads(_walk(j["code"]))
         asks = [s for s in r["steps"] if "ask" in s]
-        ok = r["error"] is None and not r["truncated"] and asks
+        ok = r["error"] is None and not r["truncated"] and asks and not any(s["ask"]["answer"].endswith("Error") for s in asks)
         print(("✓ " if ok else "✗ ") + j["tag"] + " walk: " + str(len(r["steps"])) + " steps, " + str(len(asks)) + " asks" + ("" if ok else "  " + json.dumps({"error": r["error"], "truncated": r["truncated"]})))
         for s in asks:
             print("      line " + str(s["line"]) + ": " + s["ask"]["expr"] + " = " + s["ask"]["answer"])

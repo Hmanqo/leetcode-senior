@@ -212,7 +212,8 @@ def _walk(code, use_asks=True, limit=800):
             n = seen[frame.f_lineno] = seen.get(frame.f_lineno, 0) + 1
             if which is None or n in which:
                 try:
-                    ans = _show(eval(expr, frame.f_globals, dict(frame.f_locals)))
+                    # one merged namespace, so a generator inside expr can see locals too
+                    ans = _show(eval(expr, {**frame.f_globals, **frame.f_locals}))
                 except Exception as e:
                     ans = type(e).__name__
                 st["ask"] = {"expr": expr, "answer": ans}
