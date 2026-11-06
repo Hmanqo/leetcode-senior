@@ -164,6 +164,9 @@ def _show(x, depth=0):
         except TypeError:
             items = list(x)
         return "{" + ", ".join(_show(v, depth + 1) for v in items) + "}"
+    if type(x).__module__ == "__main__" and hasattr(x, "__dict__") and not isinstance(x, type):
+        # an object of a class the code defined: show its fields, not an address
+        return type(x).__name__ + "(" + ", ".join(k + "=" + _show(v, depth + 1) for k, v in vars(x).items()) + ")"
     s = repr(x)
     return s if len(s) <= 200 else s[:200] + "…"
 
