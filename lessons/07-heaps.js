@@ -16,6 +16,7 @@ p, i, item = heapq.heappop(h)
 heapq.heapify(nums)            # O(n), in place</code></pre>
 <p>There's no max-heap: push <code>-x</code> and negate again when you pop. Put a unique tiebreak (an index or a
 counter) second in the tuple, so two equal priorities never compare the items themselves (predict d2).</p>
+<span class="trees"><span class="tree" data-tree="[1, 3, 2, 7, 4, 5]" data-path="1" data-cap="Each parent is ≤ its children, so h[0] is the smallest."></span><span class="arr" data-arr="[1, 3, 2, 7, 4, 5]" data-hl="0" data-cap="The same heap as the list heapq keeps: children of i are at 2i + 1 and 2i + 2. Not sorted."></span></span>
 
 <h3>The shapes</h3>
 <table>

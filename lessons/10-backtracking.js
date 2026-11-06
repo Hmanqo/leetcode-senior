@@ -22,6 +22,7 @@ def go(start, ...):
         go(i + 1, ...)           # explore
         path.pop()               # undo
 go(0)</code></pre>
+<span class="trees"><span class="tree" data-ntree="['[]', [['[1]', [['[1, 2]', [['[1, 2, 3]']]], ['[1, 3]']]], ['[2]', [['[2, 3]']]], ['[3]']]]" data-cap="Subsets of [1, 2, 3]. Each node is one call's path, and each child adds one item from start onwards. All 8 are recorded."></span></span>
 
 <h3>Which shape, by question</h3>
 <table>
@@ -41,6 +42,7 @@ go(0)</code></pre>
 once". It's <code>i &gt; start</code>, not <code>i &gt; 0</code>: the second 1 is still allowed <em>deeper</em> in the
 same path. For orderings, the rule is "skip a repeat whose twin isn't in use":
 <code>i &gt; 0 and nums[i] == nums[i - 1] and not used[i - 1]</code>.</p>
+<span class="trees"><span class="tree" data-ntree="['[]', [['[1]', [['[1, 2]', [['[1, 2, 2]']]], ['~[1, 2]']]], ['[2]', [['[2, 2]']]], ['~[2]']]]" data-cap="Subsets of [1, 2, 2]. Dashed: skipped by <code>i &gt; start</code>, because that value was already tried at that position. [1, 2, 2] is still reached, since there i == start."></span></span>
 
 <h3>Pruning: stop before the subtree, not inside it</h3>
 <ul>

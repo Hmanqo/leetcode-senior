@@ -34,11 +34,13 @@ worse, the checks go False…True, so you binary search the guess. Three things 
 <li><b>Why it's one-directional:</b> "if speed 4 works, speed 5 works too".</li>
 </ol>
 <p>Cost: O(n · log(range)), so even a range up to 10⁹ is only about 30 passes.</p>
+<span class="trees"><span class="arr" data-arr="[1, 2, 3, 4, 5, 6, 7, 8]" data-hl="3" data-noidx="1" data-ptr="0:no,1:no,2:no,3:yes,4:yes,5:yes,6:yes,7:yes" data-cap="Piles [3, 6, 7, 11], 8 hours. Can speed s finish? The checks go no…yes, and the answer is the first yes: 4."></span></span>
 
 <h3>Rotated lists</h3>
 <p>A sorted list turned around a point (<code>[4, 5, 6, 7, 0, 1, 2]</code>). Compare <code>nums[mid]</code> with
 <code>nums[hi]</code>: if it's bigger, the drop is to the right of <code>mid</code>. That's again a False…True check:
 "is <code>nums[i] &lt;= nums[-1]</code>?" is True exactly from the minimum onwards.</p>
+<span class="trees"><span class="arr" data-arr="[4, 5, 6, 7, 0, 1, 2]" data-hl="4" data-ptr="0:F,1:F,2:F,3:F,4:T,5:T,6:T" data-cap="nums[i] &lt;= nums[-1]: F F F F T T T. The minimum is the first T."></span></span>
 
 <h3>Traps</h3>
 <ol>

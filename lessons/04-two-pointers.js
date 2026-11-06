@@ -20,6 +20,8 @@ while lo &lt; hi:
         lo += 1                        # nums[lo] is too small with every partner left
     else:
         hi -= 1                        # nums[hi] is too big with every partner left</code></pre>
+<p>Target 15:</p>
+<span class="trees"><span class="arr" data-arr="[1, 2, 4, 7, 11, 15]" data-ptr="0:lo,5:hi" data-noidx="1" data-cap="16 &gt; 15: hi moves"></span><span class="arr" data-arr="[1, 2, 4, 7, 11, 15]" data-ptr="0:lo,4:hi" data-noidx="1" data-cap="12 &lt; 15: lo moves"></span><span class="arr" data-arr="[1, 2, 4, 7, 11, 15]" data-ptr="1:lo,4:hi" data-noidx="1" data-cap="13 &lt; 15: lo moves"></span><span class="arr" data-arr="[1, 2, 4, 7, 11, 15]" data-hl="2,4" data-ptr="2:lo,4:hi" data-noidx="1" data-cap="4 + 11 = 15"></span></span>
 
 <h3>No duplicate results</h3>
 <p>After recording a match, move both pointers past every copy of the values you just used:
@@ -41,6 +43,7 @@ partition (Dutch flag). No sort is needed.</p>
 shorter line can't do better with any partner further in: the width only shrinks, and the height can't beat it.
 Trapping Rain Water (p4) moves the side with the <b>lower max so far</b>, because that side's water level is already
 decided. In each case, say which pointer is useless and why.</p>
+<span class="trees"><span class="bars" data-bars="[1, 8, 6, 2, 5, 4, 8, 3, 7]" data-rect="1,8,7" data-hl="1,8" data-cap="Container: lines 1 and 8 hold 7 × 7 = 49."></span><span class="bars" data-bars="[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]" data-water="1" data-cap="Rain water: 6 units trapped."></span></span>
 
 <h3>Traps</h3>
 <ol>
@@ -198,7 +201,7 @@ print(sort3([2, 0, 2, 1, 1, 0]))`,
       valid: `lambda h: (isinstance(h, list) and 1 <= len(h) <= 10 and all(type(x) is int and 0 <= x <= 9 for x in h)) or "a list of 1 to 10 whole numbers from 0 to 9."`,
       rules: `a list of 1–10 whole numbers from 0 to 9.`,
       example: `[3, 0, 1]`,
-      explain: `Water above a bar is held by the <em>lower</em> of the two walls: the tallest bar on its left and the tallest on its right. With nothing tall on the right, it spills. At the 0 the walls are 3 and 1, so it holds 1, not 3. Problem p4 gets <code>min(left max, right max)</code> without building either list.`,
+      explain: `Water above a bar is held by the <em>lower</em> of the two walls: the tallest bar on its left and the tallest on its right. With nothing tall on the right, it spills. At the 0 the walls are 3 and 1, so it holds 1, not 3. Problem p4 gets <code>min(left max, right max)</code> without building either list.<span class="trees"><span class="bars" data-bars="[3, 0, 1]" data-water="1" data-cap="[3, 0, 1]: the water stops at the lower wall, 1."></span></span>`,
     },
 
     // ── Reps ────────────────────────────────────────────────────────────
@@ -462,7 +465,7 @@ print(sorted(people))`,
     {
       id: "p3", kind: "problem", title: "Container with most water", leetcode: 11,
       fn: "most_water",
-      prompt: `<code>heights[i]</code> is a vertical line at <code>x = i</code>. Two lines and the floor make a container holding <code>(j − i) · min(heights[i], heights[j])</code>. Return the most water any container can hold, in O(n).`,
+      prompt: `<code>heights[i]</code> is a vertical line at <code>x = i</code>. Two lines and the floor make a container holding <code>(j − i) · min(heights[i], heights[j])</code>. Return the most water any container can hold, in O(n).<span class="trees"><span class="bars" data-bars="[1, 8, 6, 2, 5, 4, 8, 3, 7]" data-rect="1,8,7" data-hl="1,8" data-cap="[1, 8, 6, 2, 5, 4, 8, 3, 7] → 49"></span></span>`,
       stub: `def most_water(heights):
     `,
       cases: `[
@@ -486,7 +489,7 @@ print(sorted(people))`,
     {
       id: "p4", kind: "problem", title: "Trapping rain water", leetcode: 42,
       fn: "trap",
-      prompt: `<code>heights</code> are bars of width 1. Return how much rain is trapped between them. Aim for O(n) time and O(1) extra space.`,
+      prompt: `<code>heights</code> are bars of width 1. Return how much rain is trapped between them. Aim for O(n) time and O(1) extra space.<span class="trees"><span class="bars" data-bars="[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]" data-water="1" data-cap="[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1] → 6"></span></span>`,
       stub: `def trap(heights):
     `,
       cases: `[

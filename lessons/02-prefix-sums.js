@@ -17,6 +17,7 @@ for x in nums:
 # sum of nums[i..j], both ends included:
 P[j + 1] - P[i]</code></pre>
 <p>The leading 0 is the empty prefix. It's why the formula needs no special case at <code>i = 0</code>.</p>
+<span class="trees"><span class="arr" data-arr="[3, 1, 4, 1, 5]" data-win="1,3" data-below="[0, 3, 4, 8, 9, 14]" data-belowcap="P" data-cap="nums[1..3] = P[4] − P[1] = 9 − 3 = 6. P[i] sits on the boundary before item i."></span></span>
 
 <h3>The running total + dict</h3>
 <pre><code>seen = {0: 1}                # the empty prefix, seen once
@@ -458,7 +459,7 @@ print(list(accumulate([3, 1, 4], max)))`,
     {
       id: "p5", kind: "problem", title: "Path sum III (on a tree)", leetcode: 437,
       fn: "count_paths", adapt: "lambda f, t, k: f(_tree(t), k)",
-      prompt: `Count the paths that sum to <code>k</code>. A path goes <b>downward</b> (parent to child) and can start and end at any node.`,
+      prompt: `Count the paths that sum to <code>k</code>. A path goes <b>downward</b> (parent to child) and can start and end at any node.<span class="trees"><span class="tree" data-tree="[10, 5, -3, 3, 2, None, 11, 3, -2, None, 1]" data-cap="k = 8: three paths, 5 → 3, 5 → 2 → 1 and −3 → 11."></span></span>`,
       stub: `def count_paths(root, k):
     `,
       cases: `[

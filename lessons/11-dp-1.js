@@ -37,6 +37,7 @@ for i in range(2, n + 1):
 a, b = 1, 1
 for _ in range(n - 1):
     a, b = b, a + b</code></pre>
+<span class="trees"><span class="tree" data-ntree="['ways(5)', [['ways(4)', [['ways(3)', [['ways(2)', [['ways(1)'], ['ways(0)']]], ['*ways(1)']]], ['*ways(2)', [['~ways(1)'], ['~ways(0)']]]]], ['*ways(3)', [['~ways(2)', [['~ways(1)'], ['~ways(0)']]], ['~ways(1)']]]]]" data-cap="ways(5) as plain recursion. Blue calls were already worked out once, and dashed ones are the repeated work under them. @cache turns each blue call into a lookup."></span><span class="arr" data-arr="[1, 1, 2, 3, 5, 8]" data-hl="5" data-win="3,4" data-ptr="3:i-2,4:i-1,5:i" data-cap="The table: each cell reads the two before it."></span></span>
 
 <h3>Common states</h3>
 <table>
@@ -435,7 +436,7 @@ print(INF + 1 == INF, min(INF, 3), INF > 10 ** 100)`,
             else:
                 dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
     return dp[m][n]`,
-      note: `Two strings → <code>dp[i][j]</code> on the first i of a and the first j of b. The extra row and column of 0s are the empty prefixes, the same trick as lesson 02's leading 0. If the last letters match, use both; otherwise drop one or the other.`,
+      note: `Two strings → <code>dp[i][j]</code> on the first i of a and the first j of b. The extra row and column of 0s are the empty prefixes, the same trick as lesson 02's leading 0. If the last letters match, use both; otherwise drop one or the other.<span class="trees"><span class="grid" data-grid="[[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 2, 2], [0, 1, 2, 2], [0, 1, 2, 3]]" data-rowh="['', 'a', 'b', 'c', 'd', 'e']" data-colh="['', 'a', 'c', 'e']" data-hl="1,1;3,2;5,3" data-cur="5,3" data-cap="dp for &quot;abcde&quot; and &quot;ace&quot;. Blue: a match, taken from the diagonal + 1. The answer is the bottom-right corner."></span></span>`,
     },
     {
       id: "p5", kind: "problem", title: "Edit distance", leetcode: 72,
@@ -464,7 +465,7 @@ print(INF + 1 == INF, min(INF, 3), INF > 10 ** 100)`,
             else:
                 dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
     return dp[m][n]`,
-      note: `p4's table with costs. The three neighbours are the three edits: from above = delete a's letter, from the left = insert b's letter, diagonal = replace. The base row and column are "build from or erase to nothing".`,
+      note: `p4's table with costs. The three neighbours are the three edits: from above = delete a's letter, from the left = insert b's letter, diagonal = replace. The base row and column are "build from or erase to nothing".<span class="trees"><span class="grid" data-grid="[[0, 1, 2, 3], [1, 1, 2, 3], [2, 2, 1, 2], [3, 2, 2, 2], [4, 3, 3, 2], [5, 4, 4, 3]]" data-rowh="['', 'h', 'o', 'r', 's', 'e']" data-colh="['', 'r', 'o', 's']" data-hl="0,0;0,1;0,2;0,3;1,0;2,0;3,0;4,0;5,0" data-cur="5,3" data-cap="dp for &quot;horse&quot; → &quot;ros&quot;. Row 0 and column 0 are the base cases. The answer is the corner: 3."></span></span>`,
     },
     {
       id: "p6", kind: "problem", title: "Word break", leetcode: 139,

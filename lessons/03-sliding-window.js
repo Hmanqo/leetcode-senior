@@ -19,6 +19,8 @@ for right, x in enumerate(items):
             best = max(best, right - left + 1)   # longest
             count += right - left + 1            # how many ok windows end at right</code></pre>
 <p>For "shortest window that is ok" the loop flips: <code>while the window IS ok: record, then shrink</code>.</p>
+<p>Longest window with at most 2 distinct values, at three moments:</p>
+<span class="trees"><span class="arr" data-arr="[1, 2, 1, 2, 3, 3]" data-win="0,3" data-ptr="0:left,3:right" data-cap="ok: 2 distinct"></span><span class="arr" data-arr="[1, 2, 1, 2, 3, 3]" data-win="0,4" data-bad="4" data-ptr="0:left,4:right" data-cap="add the 3: 3 distinct, not ok"></span><span class="arr" data-arr="[1, 2, 1, 2, 3, 3]" data-win="3,4" data-ptr="3:left,4:right" data-cap="shrink until ok: left = 3"></span></span>
 
 <h3>Why it's allowed: ok-ness has to be one-directional</h3>
 <p>The left edge never moves back. That's only safe if <b>shrinking an ok window keeps it ok</b> and <b>growing a
@@ -41,6 +43,7 @@ work that way. "Sum exactly k with negatives" doesn't: that's lesson 02's dict, 
 <p>When the window <code>[left..right]</code> is ok, so is every shorter window ending at <code>right</code>. That's
 <code>right − left + 1</code> windows, all counted in one step. "Exactly k" isn't one-directional (adding an item can
 push the count past k, and shrinking can drop it below), so count it as <b>at most k − at most (k − 1)</b>.</p>
+<span class="trees"><span class="arr" data-arr="[1, 2, 1, 2, 3]" data-win="1,3" data-ptr="1:left,3:right" data-cap="[1..3] is ok, so [2..3] and [3..3] are too: 3 − 1 + 1 = 3 windows end at right."></span></span>
 
 <h3>Traps</h3>
 <ol>

@@ -55,9 +55,10 @@ senior/
   index.html          the app (home + lessons)
   app.js              router, editor, timer, Python runner (Pyodide in a Web Worker)
   harness.js          the Python side: test runner, TreeNode and tree helpers
+  diagrams.js         draws trees, lists, bars, intervals and tables as SVG from <span> placeholders
   style.css
   lessons/NN-*.js     one data file per lesson
-  tools/check.mjs     verifies every lesson with local python3 (tests, stubs, predicts, walks, break-its)
+  tools/check.mjs     verifies every lesson with local python3 (tests, stubs, predicts, walks, break-its) and that every diagram draws
   QA.md               questions and answers, LeetCode misses
 ```
 

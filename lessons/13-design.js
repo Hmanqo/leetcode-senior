@@ -96,7 +96,7 @@ for v in [10, 20, 30, 40]:
 s.remove(20)
 s.remove(40)
 print(s.vals, s.pos)`,
-      note: `Removing 20: 40 moves into its slot and <code>pos[40]</code> is fixed to 1. Then removing 40 finds it at 1, where it now is. Both lines that touch <code>pos</code> matter, and Break it b1 drops one of them. When the removed value <em>is</em> the last one, the swap is with itself, and the order of the last two lines is what keeps that case right.`,
+      note: `Removing 20: 40 moves into its slot and <code>pos[40]</code> is fixed to 1. Then removing 40 finds it at 1, where it now is. Both lines that touch <code>pos</code> matter, and Break it b1 drops one of them. When the removed value <em>is</em> the last one, the swap is with itself, and the order of the last two lines is what keeps that case right.<span class="trees"><span class="arr" data-arr="[10, 20, 30, 40]" data-bad="1" data-hl="3" data-cap="remove(20): the last value moves into slot 1"></span><span class="arr" data-arr="[10, 40, 30]" data-hl="1" data-cap="then pop the end, and pos[40] = 1"></span></span>`,
     },
     {
       id: "w2", kind: "walk", title: "Lazy deletion from a heap",

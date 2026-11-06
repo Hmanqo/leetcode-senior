@@ -77,6 +77,34 @@ for j in jobs:
         ok = not ok
     print(("✓ " if ok else "✗ ") + j["tag"] + ("" if ok else "  " + json.dumps(r)))
 `;
+// Diagrams: every placeholder in a lesson's HTML must parse and draw.
+{
+  const dctx = { window: {}, document: { documentElement: {} }, MutationObserver: class { observe() {} } };
+  vm.createContext(dctx);
+  vm.runInContext(fs.readFileSync(path.join(root, "diagrams.js"), "utf8"), dctx);
+  const D = dctx.window.Diagrams;
+  const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  const camel = (k) => k.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  let drawn = 0;
+  for (const l of lessons) {
+    const texts = [["intro", l.intro || ""], ...l.exercises.flatMap((e) => ["prompt", "note", "explain"].map((k) => [`${e.id}.${k}`, e[k] || ""]))];
+    for (const [where, html] of texts) {
+      for (const m of html.matchAll(/<span class="(tree|arr|bars|ivals|grid)"([^>]*)><\/span>/g)) {
+        const o = {};
+        for (const a of m[2].matchAll(/data-([a-z-]+)="([^"]*)"/g)) o[camel(a[1])] = unesc(a[2]);
+        const kind = m[1] === "tree" && o.ntree != null ? "ntree" : m[1];
+        const data = kind === "ntree" ? o.ntree : o[kind];
+        const v = data == null ? null : kind === "ntree" ? JSON.parse(JSON.stringify(D.pyList("[" + data + "]")?.[0] ?? null)) : D.pyList(data);
+        let ok = v != null, err = "";
+        if (ok) try { const svg = D[kind === "ntree" ? "ntree" : kind](v, o); ok = /<svg/.test(svg); } catch (e) { ok = false; err = e.message; }
+        else err = "data doesn't parse: " + data;
+        if (!ok) { console.log(`✗ ${l.id} ${where}: ${kind} diagram ${err}`); failures++; } else drawn++;
+      }
+    }
+  }
+  console.log(`✓ ${drawn} diagrams draw`);
+}
+
 const out = spawnSync("python3", ["-I", "-c", py], { input: JSON.stringify(jobs), encoding: "utf8" });
 process.stdout.write(out.stdout);
 if (out.stderr) process.stderr.write(out.stderr);

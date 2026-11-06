@@ -13,6 +13,7 @@ running count.</p>
 <p><code>[a, b]</code> and <code>[c, d]</code> overlap exactly when <code>a &lt;= d and c &lt;= b</code>: each starts
 before the other ends. With half-open intervals (meetings, where <code>[1, 2]</code> and <code>[2, 3]</code> don't
 clash) it's <code>&lt;</code>. Most bugs here are this one character, so decide it first.</p>
+<span class="trees"><span class="ivals" data-ivals="[[1, 4], [3, 6]]" data-hl="0,1" data-cap="overlap: 1 ≤ 6 and 3 ≤ 4"></span><span class="ivals" data-ivals="[[1, 2], [3, 5]]" data-cap="apart: 3 &gt; 2"></span><span class="ivals" data-ivals="[[1, 2], [2, 3]]" data-cap="touching: closed, they overlap; half-open, they don't"></span></span>
 
 <h3>Merge: sort by start, extend or append</h3>
 <pre><code>intervals.sort()                        # by start
@@ -22,6 +23,7 @@ for s, e in intervals:
         out[-1][1] = max(out[-1][1], e) # max: e might be inside already
     else:
         out.append([s, e])</code></pre>
+<span class="trees"><span class="ivals" data-ivals="[[1, 3], [2, 6], [8, 10], [9, 12], [15, 18]]" data-out="[[1, 6], [8, 12], [15, 18]]" data-outcap="merged" data-cap="Sorted by start, each one either extends the last merged interval or starts a new one."></span></span>
 
 <h3>Two sorted lists: walk them together</h3>
 <p>Intersections of two sorted interval lists: the overlap of <code>A[i]</code> and <code>B[j]</code> is
@@ -42,6 +44,7 @@ for _, delta in events:
 half-open meetings: one room is freed before the next is taken. For closed intervals that share a point, you want
 starts first instead. If coordinates are small integers, a <b>difference array</b> does the same with no sort:
 <code>diff[s] += 1; diff[e] -= 1</code>, then a running sum (lesson 02).</p>
+<span class="trees"><span class="ivals" data-ivals="[[1, 5], [2, 7], [4, 9], [8, 10]]" data-count="1" data-cap="The shaded bars are cur at each moment. The most at once is 3, from 4 to 5."></span></span>
 
 <h3>Which sort?</h3>
 <table>
@@ -391,7 +394,7 @@ print(overlaps([1, 3], [2, 5]), overlaps([5, 6], [1, 2]))`,
     {
       id: "p1", kind: "problem", title: "Insert interval", leetcode: 57,
       fn: "insert",
-      prompt: `<code>intervals</code> is sorted and non-overlapping. Insert <code>new</code>, merging where needed, and return the result, in O(n) (no sorting).`,
+      prompt: `<code>intervals</code> is sorted and non-overlapping. Insert <code>new</code>, merging where needed, and return the result, in O(n) (no sorting).<span class="trees"><span class="ivals" data-ivals="[[1, 2], [3, 5], [6, 7], [8, 10], [12, 16], [4, 8]]" data-hl="5" data-out="[[1, 2], [3, 10], [12, 16]]" data-outcap="result" data-cap="Second test: new = [4, 8], in blue."></span></span>`,
       stub: `def insert(intervals, new):
     `,
       cases: `[
@@ -442,7 +445,7 @@ print(overlaps([1, 3], [2, 5]), overlaps([5, 6], [1, 2]))`,
     {
       id: "p3", kind: "problem", title: "Meeting rooms II", leetcode: 253,
       fn: "min_rooms",
-      prompt: `Each meeting is <code>[start, end)</code>: a room freed at time 5 can be used by a meeting starting at 5. Return the fewest rooms needed.`,
+      prompt: `Each meeting is <code>[start, end)</code>: a room freed at time 5 can be used by a meeting starting at 5. Return the fewest rooms needed.<span class="trees"><span class="ivals" data-ivals="[[0, 30], [5, 10], [15, 20]]" data-count="1" data-cap="Never more than 2 at once, so 2 rooms."></span></span>`,
       stub: `def min_rooms(meetings):
     `,
       cases: `[

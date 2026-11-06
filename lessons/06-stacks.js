@@ -27,6 +27,7 @@ greater value). Pick the direction from the question:</p>
 <tr><td>previous greater / smaller</td><td>same pops, then read the top <em>after</em> popping, before pushing</td><td>same</td></tr>
 </tbody>
 </table>
+<span class="trees"><span class="arr" data-arr="[2, 1, 2, 4, 3]" data-hl="0,2" data-ptr="3:x" data-cap="Before i = 3: index 1 popped at i = 2, so 0 and 2 are waiting. 4 beats both."></span><span class="arr" data-arr="[4, 2, 4, -1, -1]" data-noidx="" data-cap="ans when it's done"></span></span>
 
 <h3>Contribution counting</h3>
 <p>"Sum of the minimum of every subarray" can't list O(n²) subarrays. Turn it around: <code>nums[j]</code> is the minimum
@@ -35,6 +36,7 @@ of every subarray that starts after the previous smaller item and ends before th
 under it is <code>left</code> and the current index is <code>right</code>. With equal values, make one side strict and
 the other not, or ties get counted twice (Break it b1). Largest Rectangle (p2) is the same pop with
 <code>height · width</code>.</p>
+<span class="trees"><span class="arr" data-arr="[3, 1, 4, 5, 2, 6]" data-hl="2" data-win="2,3" data-ptr="1:left,2:j,4:right" data-cap="4 is the minimum of every subarray that holds it, from just after left to just before right: (2 − 1) · (4 − 2) = 2 of them, [4] and [4, 5]."></span></span>
 
 <h3>Monotonic deque: max of every window</h3>
 <p>Window maximum needs a queue: new items enter on the right, and old ones leave on the left. Keep it in decreasing
@@ -425,7 +427,7 @@ print(nxt([2, 2, 3], True))`,
     {
       id: "p2", kind: "problem", title: "Largest rectangle in a histogram", leetcode: 84,
       fn: "largest_rect",
-      prompt: `Bars of width 1 with the given heights. Return the area of the largest rectangle that fits under them, in O(n).`,
+      prompt: `Bars of width 1 with the given heights. Return the area of the largest rectangle that fits under them, in O(n).<span class="trees"><span class="bars" data-bars="[2, 1, 5, 6, 2, 3]" data-rect="2,3,5" data-cap="[2, 1, 5, 6, 2, 3] → 5 × 2 = 10"></span></span>`,
       stub: `def largest_rect(heights):
     `,
       cases: `[

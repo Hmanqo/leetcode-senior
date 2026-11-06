@@ -169,8 +169,8 @@ details.sol summary { cursor: pointer; color: var(--accent); }
 
 /* tree diagrams (drawn by app.js from <span class="tree" data-tree="[...]">) */
 .trees { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: flex-end; margin: 10px 0; }
-.tree { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; margin: 6px 0; max-width: 100%; vertical-align: top; }
-.tree svg { max-width: 100%; height: auto; overflow: visible; }
+.tree, .arr, .bars, .ivals, .grid { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; margin: 6px 0; max-width: 100%; vertical-align: top; }
+.tree svg, .arr svg, .bars svg, .ivals svg, .grid svg { max-width: 100%; height: auto; overflow: visible; }
 .tree line { stroke: var(--muted); stroke-width: 1.5; }
 .tree line.on { stroke: var(--accent); stroke-width: 3; }
 .tree circle { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
@@ -179,3 +179,45 @@ details.sol summary { cursor: pointer; color: var(--accent); }
 .tree .bad circle { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2.5; }
 .tree .bad text { fill: var(--bad); }
 .tree-cap { font-size: 13px; color: var(--muted); text-align: center; }
+.tree .cur circle, .tree .cur rect { fill: var(--accent); stroke: var(--accent); stroke-width: 2.5; }
+.tree .cur text { fill: var(--panel); }
+.tree rect { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+.tree .on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+.tree .bad rect { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2.5; }
+.trees.small { margin: 6px 0 2px; }
+.trees.small .tree svg { transform-origin: top left; }
+.trees.small > span { zoom: 0.8; }
+#wtree .tree { margin: 0 0 6px; }
+#bprev:empty { display: none; }
+
+.tree .faded circle, .tree .faded rect { stroke-dasharray: 3 3; fill: none; }
+.tree .faded text { fill: var(--muted); }
+.tree line.faded { stroke-dasharray: 3 3; opacity: .6; }
+/* arr, bars, ivals, grid */
+.arr text, .bars text, .ivals text, .grid text { fill: var(--ink); font: 600 13px var(--mono); text-anchor: middle; dominant-baseline: central; }
+.arr .cell rect, .grid .cell rect { fill: var(--panel); stroke: var(--muted); stroke-width: 1; }
+.arr .cell.inwin rect { fill: var(--accent-soft); }
+.arr .cell.on rect, .grid .cell.on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.arr .cell.bad rect, .grid .cell.bad rect { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2; }
+.arr .cell.bad text, .grid .cell.bad text { fill: var(--bad); }
+.grid .cell.cur rect { fill: var(--accent); stroke: var(--accent); }
+.grid .cell.cur text { fill: var(--panel); }
+.arr .cell.below rect { fill: var(--code-bg); stroke: var(--line); }
+.arr rect.win { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.arr .idx, .ivals .idx, .grid .hdr { fill: var(--muted); font: 500 11px var(--mono); }
+.grid .hdr { font-size: 12px; font-weight: 600; }
+.arr .ptr, .bars .ptr { fill: var(--accent); font: 700 12px var(--mono); }
+.arr line.tick, .ivals line.tick { stroke: var(--line); stroke-width: 1; }
+.bars rect.bar { fill: var(--muted); opacity: .55; }
+.bars rect.bar.on { fill: var(--accent); opacity: 1; }
+.bars rect.water { fill: var(--accent); opacity: .3; }
+.bars rect.hirect { fill: var(--accent); fill-opacity: .15; stroke: var(--accent); stroke-width: 2.5; }
+.bars .val { fill: var(--muted); font: 500 11px var(--mono); }
+.bars line.base, .ivals line.base { stroke: var(--muted); stroke-width: 1.5; }
+.ivals .iv rect { fill: var(--code-bg); stroke: var(--muted); stroke-width: 1.2; }
+.ivals .iv text { font-size: 11px; }
+.ivals .iv.on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.ivals .iv.bad rect { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2; }
+.ivals .iv.out rect { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 2; }
+.ivals rect.count { fill: var(--accent); opacity: .35; }
+.ivals .cnt { fill: var(--muted); font: 500 10px var(--mono); }

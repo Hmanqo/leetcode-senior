@@ -39,6 +39,7 @@ first meeting of any best schedule, because it leaves at least as much room afte
 <tr><td><b>Greedy + heap</b></td><td>a heap of choices you can still take back (lesson 07)</td><td>630, 871</td></tr>
 </tbody>
 </table>
+<span class="trees"><span class="ivals" data-ivals="[[1, 3], [2, 5], [4, 7], [6, 9], [8, 10]]" data-hl="0,2,4" data-bad="1,3" data-cap="Sorted by end: take [1, 3], skip [2, 5] (it starts before 3), take [4, 7], skip [6, 9], take [8, 10]. Three."></span></span>
 
 <h3>Greedy or DP?</h3>
 <p>Ask: <b>does taking this now change what's left in a way I can't swap back?</b> Paying 6 with coins 1, 3, 4: taking
@@ -464,7 +465,7 @@ print(count([[1, 2], [2, 3], [3, 4]]))`,
     {
       id: "p3", kind: "problem", title: "Fewest arrows to burst balloons", leetcode: 452,
       fn: "min_arrows",
-      prompt: `Each balloon covers <code>[start, end]</code> on a line. An arrow shot at <code>x</code> bursts every balloon with <code>start ≤ x ≤ end</code>. Return the fewest arrows that burst them all.`,
+      prompt: `Each balloon covers <code>[start, end]</code> on a line. An arrow shot at <code>x</code> bursts every balloon with <code>start ≤ x ≤ end</code>. Return the fewest arrows that burst them all.<span class="trees"><span class="ivals" data-ivals="[[10, 16], [2, 8], [1, 6], [7, 12]]" data-cap="First test: 2 arrows burst all four."></span></span>`,
       stub: `def min_arrows(points):
     `,
       cases: `[

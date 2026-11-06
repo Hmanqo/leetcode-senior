@@ -46,50 +46,16 @@
   const straight = (s) => s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
   const ASK_MARK = /\s*#\s*ask(?:\s+[\d,\s]+)?:.*$/;
 
-  // ── tree diagrams ────────────────────────────────────────────────────────
-  // Lesson HTML can hold <span class="tree" data-tree="[8, 4, 12]"></span>, a LeetCode
-  // level-order list. Optional: data-path="8,12" (highlighted nodes and the edges between
-  // them), data-bad="3" (marked wrong), data-cap="caption". x = inorder position, so a
-  // BST reads sorted from left to right.
-  function treeSvg(vals, path, bad) {
-    if (!vals.length || vals[0] == null) return `<em>(empty tree)</em>`;
-    const nodes = [{ v: vals[0], d: 0 }];
-    const q = [nodes[0]];
-    for (let i = 1; q.length && i < vals.length; ) {
-      const p = q.shift();
-      for (const side of ["l", "r"]) {
-        if (i < vals.length && vals[i] != null) { const c = { v: vals[i], d: p.d + 1 }; p[side] = c; nodes.push(c); q.push(c); }
-        i++;
-      }
-    }
-    let x = 0;
-    const place = (n) => { if (!n) return; place(n.l); n.x = x++; place(n.r); };
-    place(nodes[0]);
-    const R = 15, DX = 36, DY = 52, PAD = 4;
-    const depth = Math.max(...nodes.map((n) => n.d));
-    const W = (x - 1) * DX + 2 * (R + PAD), H = depth * DY + 2 * (R + PAD);
-    const cx = (n) => n.x * DX + R + PAD, cy = (n) => n.d * DY + R + PAD;
-    const on = (n) => path.has(String(n.v));
-    let edges = "", circles = "";
-    for (const n of nodes) for (const c of [n.l, n.r]) if (c) {
-      edges += `<line x1="${cx(n)}" y1="${cy(n)}" x2="${cx(c)}" y2="${cy(c)}" class="${on(n) && on(c) ? "on" : ""}"/>`;
-    }
-    for (const n of nodes) {
-      const cls = bad.has(String(n.v)) ? "bad" : on(n) ? "on" : "";
-      circles += `<g class="${cls}"><circle cx="${cx(n)}" cy="${cy(n)}" r="${R}"/><text x="${cx(n)}" y="${cy(n)}">${esc(n.v)}</text></g>`;
-    }
-    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="tree ${esc(JSON.stringify(vals))}">${edges}${circles}</svg>`;
+  // ── diagrams (diagrams.js draws every placeholder as it appears) ─────────
+  const { pyList } = window.Diagrams;
+  const treeSpan = (vals, opts = {}) => window.Diagrams.span("tree", vals, opts);
+  // Which arguments of an exercise are trees, and whether its result is one, read off its adapt lambda.
+  function treeShape(ex) {
+    const m = /^\s*lambda\s+f\s*,([^:]*):(.*)$/s.exec(ex.adapt || "");
+    if (!m) return { args: [], out: false };
+    const names = m[1].split(",").map((t) => t.trim());
+    return { args: names.map((n, k) => (new RegExp("_tree\\(\\s*" + n + "\\s*\\)").test(m[2]) ? k : -1)).filter((k) => k >= 0), out: /^\s*_tree_list\(\s*f\(/.test(m[2]) };
   }
-  function drawTrees(root) {
-    root.querySelectorAll(".tree:not([data-drawn])").forEach((el) => {
-      el.dataset.drawn = "1";
-      const set = (s) => new Set((s || "").split(",").map((t) => t.trim()).filter(Boolean));
-      let vals;
-      try { vals = JSON.parse(el.dataset.tree.replace(/None/g, "null")); } catch { return; }
-      el.innerHTML = treeSvg(vals, set(el.dataset.path), set(el.dataset.bad)) + (el.dataset.cap ? `<span class="tree-cap">${el.dataset.cap}</span>` : "");
-    });
-  }
-  new MutationObserver(() => drawTrees(document)).observe(document.documentElement, { childList: true, subtree: true });
 
   // ── Python in a worker (so an infinite loop can be killed) ───────────────
   function workerMain() {
@@ -459,10 +425,30 @@
         if (bad) ed.markLine(bad.line);
       }
 
+      // Trees in the inputs (and in the result, for exercises that return one) are drawn
+      // under each case. A tree that's the same as the case above isn't drawn again.
+      const shape = treeShape(ex);
+      let lastTrees = "";
+      const isTree = (v) => Array.isArray(v) && v.length > 0 && v[0] != null;
+      const caseTrees = (c) => {
+        if (!c.raw) return "";
+        const parts = shape.args.map((k) => c.raw.args && isTree(c.raw.args[k]) ? treeSpan(c.raw.args[k], { cap: shape.args.length > 1 ? `argument ${k + 1}` : "" }) : "");
+        let ins = parts.join("");
+        const same = ins === lastTrees;
+        lastTrees = ins;
+        if (same && ins) ins = `<span class="times">(same tree as above)</span>`;
+        let outs = "";
+        if (shape.out) {
+          if (isTree(c.raw.got)) outs += treeSpan(c.raw.got, { cap: "got" });
+          if (!c.ok && isTree(c.raw.exp)) outs += treeSpan(c.raw.exp, { cap: "expected" });
+        }
+        return ins || outs ? `<span class="trees small">${ins}${outs}</span>` : "";
+      };
       const cases = (res.cases || []).map((c) => `
         <div class="case ${c.ok ? "ok" : "bad"}"><span class="mark">${c.ok ? "✓" : "✗"}</span>${esc(c.call)}
           <div class="row got">got&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>${esc(c.got)}</b>${c.line ? ` <span>(line ${c.line})</span>` : ""}</div>
           ${c.ok ? "" : `<div class="row">expected <b>${esc(c.expected)}</b></div>`}
+          ${caseTrees(c)}
         </div>`).join("");
       const printed = res.stdout ? `<h4 style="margin-top:12px">Printed</h4><pre>${esc(res.stdout)}</pre>` : "";
       const after = allOk && isRep
@@ -546,6 +532,7 @@
           </div>
           <input type="range" id="wslider" min="0" max="0" value="0" aria-label="Step">
           <div id="wask"></div>
+          <div id="wtree"></div>
           <h4>Variables</h4><div id="wframes" class="wframes"></div>
           <h4>Printed</h4><pre id="wout" class="wout"></pre>
         </div>
@@ -612,6 +599,21 @@
         return `<div class="frame${top && st.event !== "end" ? " now" : ""}"><div class="fn">${name}</div>${rows}${ret}</div>`;
       }).join("") || `<div class="var empty">nothing yet</div>`;
       $("#wout").textContent = st.out || " ";
+
+      // the tree the code builds, if any: the node the current call is on is filled in,
+      // and nodes the waiting calls are on are outlined
+      const tm = /\btree\((\[[^\]]*\])\)/.exec(code);
+      const tv = tm && pyList(tm[1]);
+      if (tv && tv.length) {
+        const nodesIn = (f) => Object.values(f.vars).flatMap((v) => [...String(v).matchAll(/TreeNode\((-?\d+)\)/g)].map((m) => m[1]));
+        const fr = st.frames.filter((f) => f.fn !== "<module>");
+        const top = fr.length ? nodesIn(fr[fr.length - 1]) : [];
+        // a frame's "node" (or "root") variable is the one it's on; prefer it over others
+        const onNode = (f) => { const v = f.vars.node ?? f.vars.root; const m = v && /^TreeNode\((-?\d+)\)$/.exec(v); return m ? [m[1]] : null; };
+        const curs = fr.length ? onNode(fr[fr.length - 1]) || top : [];
+        const html = `<h4>Tree</h4>${treeSpan(tv, { cur: curs.join(","), path: fr.slice(0, -1).flatMap((f) => onNode(f) || nodesIn(f)).join(",") })}`;
+        if ($("#wtree").dataset.html !== html) { $("#wtree").dataset.html = html; $("#wtree").innerHTML = html; }
+      } else $("#wtree").innerHTML = "";
 
       // the question, if this step has one
       const a = st.ask, box = $("#wask");
@@ -699,6 +701,8 @@
 
   // ── break it: find an input where a plausible wrong answer fails ─────────
   function renderBreak(l, ex, pane, nextLink, refreshSide) {
+    // A break-it whose input is a level-order list draws it as you type, and in each try.
+    const isTreeArg = /level_order/.test(ex.args || "");
     pane.innerHTML = `
       <div class="meta">Break it</div>
       <h2>${esc(ex.title)}</h2>
@@ -707,13 +711,20 @@
       ${ex.rules ? `<p class="times">Rules for your input: ${ex.rules}</p>` : ""}
       <div class="bar breakbar"><code>${esc(ex.fn)}(</code><input class="answer one" id="bin" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="${esc(ex.args)}"><code>)</code>
         <button class="btn primary" id="btry">Try it</button></div>
+      <div id="bprev" class="trees small"></div>
       <div class="results" id="results"></div>
       <div id="bhist" class="bhist"></div>
-      <details class="sol"><summary>Show an input that breaks it</summary><pre><code>${esc(ex.fn)}(${esc(ex.example)})</code></pre><div class="note">${ex.explain}</div></details>
+      <details class="sol"><summary>Show an input that breaks it</summary><pre><code>${esc(ex.fn)}(${esc(ex.example)})</code></pre>${isTreeArg ? treeSpan(pyList(ex.example) || []) : ""}<div class="note">${ex.explain}</div></details>
       ${nextLink}`;
     const inp = $("#bin"), hist = [];
     inp.value = store.get(key(l, ex, "input"), "");
-    inp.addEventListener("input", () => store.set(key(l, ex, "input"), inp.value));
+    const preview = () => {
+      if (!isTreeArg) return;
+      const v = pyList(straight(inp.value));
+      $("#bprev").innerHTML = v && v.length && Number.isInteger(v[0]) && v.length <= 15 ? treeSpan(v, { cap: "your tree" }) : "";
+    };
+    inp.addEventListener("input", () => { store.set(key(l, ex, "input"), inp.value); preview(); });
+    preview();
     inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); attempt(); } });
     $("#btry").addEventListener("click", attempt);
     inp.focus();
@@ -730,7 +741,8 @@
       else if (r.fatal) head = `<div class="banner bad">${esc(r.fatal)}</div>`;
       else if (r.bad) head = `<div class="banner bad">${esc(r.bad)}</div>`;
       else {
-        hist.unshift(`<div class="case ${r.broke ? "ok" : "bad"}"><span class="mark">${r.broke ? "✓" : "·"}</span>${esc(r.call)}<div class="row">it says <b>${esc(r.got)}</b>, the right answer is <b>${esc(r.right)}</b></div></div>`);
+        const tv = isTreeArg ? pyList(src) : null;
+        hist.unshift(`<div class="case ${r.broke ? "ok" : "bad"}"><span class="mark">${r.broke ? "✓" : "·"}</span>${esc(r.call)}<div class="row">it says <b>${esc(r.got)}</b>, the right answer is <b>${esc(r.right)}</b></div>${tv ? `<span class="trees small">${treeSpan(tv)}</span>` : ""}</div>`);
         $("#bhist").innerHTML = `<h4>Your tries</h4>` + hist.join("");
         if (r.broke) {
           store.set(key(l, ex, "done"), Date.now());

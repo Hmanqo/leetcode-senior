@@ -98,6 +98,14 @@ def _err(e):
     text = str(e)
     return {"line": line, "msg": type(e).__name__ + (": " + text if text else "")}
 
+def _jsonable(x):
+    # plain data only, so the page can draw trees from it; anything else becomes None
+    if x is None or isinstance(x, (bool, int, float, str)):
+        return x
+    if isinstance(x, (list, tuple)):
+        return [_jsonable(v) for v in x]
+    return None
+
 def _run_tests(code, fname, cases_src, mode, adapt=""):
     buf = io.StringIO()
     res = {"stdout": "", "error": None, "cases": []}
@@ -122,6 +130,7 @@ def _run_tests(code, fname, cases_src, mode, adapt=""):
                     with contextlib.redirect_stdout(buf):
                         got = call(fn, *copy.deepcopy(args)) if call else fn(*copy.deepcopy(args))
                     c["got"] = _fmt(got)
+                    c["raw"] = {"args": _jsonable(args), "exp": _jsonable(exp), "got": _jsonable(got)}
                     try:
                         c["ok"] = _norm(got, mode) == _norm(exp, mode)
                     except Exception as e:
