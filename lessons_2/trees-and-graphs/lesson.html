@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trees &amp; Graphs</title>
+<meta name="description" content="A visual, narrative guide to trees, graphs, backtracking and dynamic programming, with step-through animations.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="toc" aria-label="Contents">
+    <div class="kicker">Contents</div>
+    <ul id="toc"></ul>
+    <div class="progress"><span id="progress-text"></span><div class="bar"><i id="progress-bar"></i></div></div>
+    <button class="theme" id="theme" type="button">Theme: auto</button>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Trees &amp; Graphs, taken apart</div>
+      <h1>Everything that branches, loops and connects</h1>
+      <p class="lede">Trees, graphs, backtracking and dynamic programming look like four topics. They're one: things connected to other things, and the handful of ways to walk through them. This guide teaches each walk as a picture first and a story second. Code comes last, and there isn't much of it.</p>
+      <div class="actions">
+        <a class="btn" href="#ch1">Start reading</a>
+        <a class="btn ghost" href="index.html">Open the lab: every animation in one place →</a>
+      </div>
+    </header>
+
+    <section class="ch" id="how">
+      <h3 style="margin-top:0">How to use this page</h3>
+      <p>Every box with a <b style="color:var(--accent)">▶</b> is an animation you step through yourself. Press <b>Step ›</b> (or the → key once you've clicked the box) and read the sentence under the picture before moving on. The panel on the right shows what the algorithm is holding in its hands: a queue, a stack, a set of chalk marks. The numbered list under the narration is the recipe, with the line that's running in bold.</p>
+      <p>The colours mean the same thing everywhere:</p>
+      <div class="legend" style="margin:0 0 14px"><span class="l-active">working on it right now</span><span class="l-frontier">waiting in line</span><span class="l-path">on the current path</span><span class="l-done">finished</span><span class="l-bad">conflict or failure</span></div>
+      <p>Each chapter ends with <b>Check yourself</b> questions (answer them in your head before opening), a short Python template you can fold open, and LeetCode problems to try cold. Tick a chapter off when you're done; the page remembers.</p>
+    </section>
+
+    <!-- ═════════════════════════ PART I -->
+    <div class="part">Part I · Seeing the shapes</div>
+
+    <section class="ch" id="ch1" data-ch="1">
+      <div class="ch-head"><div class="ch-num">01</div><div><h2>Graphs and trees: one idea, different rules</h2><p class="ch-sub">Dots, lines, and the rules that make some of them trees.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>A map of towns and roads. The towns are <b>nodes</b> (also called vertices), the roads are <b>edges</b>. Some roads are one-way (a <b>directed</b> graph), some have a length or a toll (a <b>weighted</b> graph). That's all a graph is: things, and which things connect to which.</p></div>
+
+      <p>A <b>tree</b> is a graph with two extra promises: it's <b>connected</b> (you can get from anywhere to anywhere) and it has <b>no loops</b>. Together those mean there's exactly <b>one route</b> between any two nodes. Think of the folders on your computer: every folder sits inside exactly one parent, and you can't end up back where you started by only going into subfolders.</p>
+
+      <div data-viz="shapes"></div>
+
+      <p>Because a tree has no loops, you can walk it without remembering where you've been: going down can never bring you back to a node you've seen. A graph can loop, so every graph walk needs a <b>visited</b> set. That one difference explains most of what follows.</p>
+
+      <h3>The words you'll need</h3>
+      <div data-viz="anatomy"></div>
+      <div class="tablewrap"><table>
+        <tr><th>Word</th><th>Meaning</th></tr>
+        <tr><td><b>root</b></td><td>The top of a tree, the one node with no parent.</td></tr>
+        <tr><td><b>leaf</b></td><td>A node with no children.</td></tr>
+        <tr><td><b>depth</b> of a node</td><td>How many edges from the root down to it. The root has depth 0.</td></tr>
+        <tr><td><b>height</b> of a tree</td><td>The depth of its deepest leaf. (LeetCode's "maximum depth" counts nodes instead, so it's height + 1.)</td></tr>
+        <tr><td><b>subtree</b></td><td>A node plus everything below it. It's a complete tree in its own right.</td></tr>
+        <tr><td><b>degree</b></td><td>In a graph, how many edges touch a node. Directed graphs split this into <b>in-degree</b> (arrows in) and <b>out-degree</b> (arrows out).</td></tr>
+        <tr><td><b>path</b>, <b>cycle</b></td><td>A path is a route along edges. A cycle is a path that ends where it started.</td></tr>
+        <tr><td><b>connected component</b></td><td>A group of nodes that can all reach each other, with no edge leading out of the group.</td></tr>
+        <tr><td><b>DAG</b></td><td>Directed Acyclic Graph: one-way edges, no cycles. Prerequisites, build steps, and (you'll see) every DP.</td></tr>
+      </table></div>
+
+      <div class="callout idea"><span class="tag">The big idea</span><p>A tree with <i>n</i> nodes always has exactly <i>n − 1</i> edges: every node except the root has exactly one edge up to its parent. Add one more edge to a tree and you've made a cycle; remove one and it falls into two pieces. Problems like <i>Redundant Connection</i> and <i>Graph Valid Tree</i> are this fact and nothing else.</p></div>
+
+      <details class="check"><summary>A graph has 6 nodes and 6 edges and is connected. Is it a tree? <span class="hint">think, then open</span></summary><div class="ans"><p>No. A connected tree on 6 nodes has exactly 5 edges. With 6, there's one edge too many, so there's exactly one cycle somewhere.</p></div></details>
+      <details class="check"><summary>Why does the subtree fact matter so much? <span class="hint">think, then open</span></summary><div class="ans"><p>Because a problem about a tree can be answered by solving the same problem on two smaller trees (the left and right subtrees) and combining the answers. That's recursion, and it's chapter 3.</p></div></details>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch2" data-ch="2">
+      <div class="ch-head"><div class="ch-num">02</div><div><h2>How a computer holds them</h2><p class="ch-sub">Four ways to write a graph down, and which one LeetCode hands you.</p></div></div>
+
+      <p>A drawing is for you. The computer needs the same information as data, and how it's stored decides what's cheap to ask.</p>
+
+      <div class="cards">
+        <div class="card"><h4>Node objects</h4><span class="to">TreeNode(val, left, right)</span><p>Each node knows only its own children, like a folder that knows its subfolders but not its parent. You get the root and nothing else. This is how LeetCode gives you trees.</p></div>
+        <div class="card"><h4>Adjacency list</h4><span class="to">{A: [B, C], B: [A, D]}</span><p>A phone's contact list: for each person, the people they can call. Cheap to list someone's neighbours. The default for graphs. Space O(V + E).</p></div>
+        <div class="card"><h4>Edge list</h4><span class="to">[[0,1], [1,2], [2,0]]</span><p>A list of roads. LeetCode usually gives graphs this way, and your first job is to turn it into an adjacency list. Union-Find and Kruskal like it as is.</p></div>
+        <div class="card"><h4>Matrix / grid</h4><span class="to">grid[r][c]</span><p>A mileage chart, or a chessboard. In a grid, nobody wrote the edges down: a cell's neighbours are <i>computed</i> (up, down, left, right). Chapter 8.</p></div>
+      </div>
+
+      <div class="callout trap"><span class="tag">Watch out</span><p>An undirected edge <code>[a, b]</code> must go in <b>both</b> lists: <code>adj[a].append(b)</code> <i>and</i> <code>adj[b].append(a)</code>. Forgetting the second is the most common graph bug there is. For a directed edge, add only one, and check which way the problem means it ("<code>[a, b]</code>: to take a you must first take b" points from b to a).</p></div>
+
+      <details class="tpl"><summary>Template: edge list → adjacency list <span class="hint">Python</span></summary><div class="ans"><pre><code>from collections import defaultdict
+adj = defaultdict(list)
+for a, b in edges:
+    adj[a].append(b)
+    adj[b].append(a)      # leave this out if the graph is directed</code></pre></div></details>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <!-- ═════════════════════════ PART II -->
+    <div class="part">Part II · Trees</div>
+
+    <section class="ch" id="ch3" data-ch="3">
+      <div class="ch-head"><div class="ch-num">03</div><div><h2>Recursion: delegate, don't micromanage</h2><p class="ch-sub">The one mindset that solves most tree problems.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>The CEO wants to know how many people work at the company. She doesn't count them. She asks each of her direct reports, "how many people are in your part of the company, including you?" Each of them asks <i>their</i> reports the same question. An intern with no reports says "just me: 1." Answers flow back up, each manager adds their reports' answers plus one, and the CEO gets her number without ever looking past the people right below her.</p></div>
+
+      <p>That is recursion on a tree, and the important part is what the CEO <b>doesn't</b> do: she doesn't think about the whole company. She trusts that each report will give a correct answer for their part, and she only decides how to <b>combine</b> those answers. Programmers call this trust the <b>leap of faith</b>. If you find yourself tracing the recursion five levels deep in your head, you've stopped trusting, and the problem gets harder, not easier.</p>
+
+      <h3>Three questions answer almost every tree problem</h3>
+      <ol>
+        <li><b>What does a node report to its parent?</b> Say it in one sentence: "the height of my subtree", "the sum of my subtree", "whether my subtree is balanced".</li>
+        <li><b>What does an empty tree report?</b> This is the base case: <code>None</code> returns 0, or True, or an empty list. Pick the value that makes the combine step work without special cases.</li>
+        <li><b>How does a node combine its children's reports?</b> "1 + the bigger of the two", "left + right + my value".</li>
+      </ol>
+      <p>Watch the answers flow up for "maximum depth". Notice that no node starts its answer until both children have finished theirs. That's what makes it a <b>post-order</b> problem: children first, then me.</p>
+
+      <div data-viz="depth"></div>
+
+      <h3>Two directions information can travel</h3>
+      <div class="cards">
+        <div class="card"><h4>Bottom-up: reports</h4><span class="to">return value</span><p>Children report up, parents combine. Height, size, sum, balanced, diameter, LCA. The answer is <i>returned</i>. Most tree problems are this.</p></div>
+        <div class="card"><h4>Top-down: a backpack</h4><span class="to">parameter</span><p>A parent hands each child a backpack of facts about the route so far: the running sum, the depth, the allowed range. Path Sum, Good Nodes, validate BST. The answer is <i>passed down</i>.</p></div>
+      </div>
+      <p>Many harder problems use both at once: a backpack going down (where am I, what have I seen) and a report coming up (what's below me). When you're stuck, ask: <i>does this node need to know something about its ancestors (backpack) or about its descendants (report)?</i></p>
+
+      <div class="callout idea"><span class="tag">Cost</span><p>Each node is visited once and does a fixed amount of work, so tree recursion is <b>O(n) time</b>. The paused calls waiting for answers take <b>O(h) space</b>, where <i>h</i> is the height: about log n for a bushy, balanced tree, but up to <i>n</i> for a tree that's really a long chain.</p></div>
+      <div class="callout trap"><span class="tag">Watch out</span><p>Python stops recursion at about 1000 levels deep. A LeetCode tree shaped like a 10,000-node chain will crash with <code>RecursionError</code>. Either add <code>sys.setrecursionlimit(10**5)</code> or switch to an explicit stack (chapter 4).</p></div>
+
+      <details class="check"><summary>For "is this tree balanced?", what should each node report? <span class="hint">think, then open</span></summary><div class="ans"><p>Its height, with a special value (say −1) meaning "I'm already unbalanced somewhere below." A node checks: either child −1, or heights differ by more than 1? Report −1. Otherwise report 1 + the bigger height. Reporting just True/False doesn't work, because the parent also needs the heights to check itself.</p></div></details>
+      <details class="check"><summary>Count the "good" nodes: those with no ancestor larger than them. Backpack or report? <span class="hint">think, then open</span></summary><div class="ans"><p>Backpack: each node needs to know the <b>largest value on the route from the root</b>. Pass it down; a node is good if its value is at least that max. The count comes back up as a report. Both directions in one problem.</p></div></details>
+
+      <details class="tpl"><summary>Template: a bottom-up report <span class="hint">Python</span></summary><div class="ans"><pre><code>def solve(node):
+    if not node:
+        return BASE                 # what an empty tree reports
+    left = solve(node.left)         # trust it
+    right = solve(node.right)       # trust it
+    return combine(node.val, left, right)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/"><b>104</b>Maximum Depth</a></li>
+        <li><a href="https://leetcode.com/problems/invert-binary-tree/"><b>226</b>Invert Tree</a></li>
+        <li><a href="https://leetcode.com/problems/same-tree/"><b>100</b>Same Tree</a></li>
+        <li><a href="https://leetcode.com/problems/symmetric-tree/"><b>101</b>Symmetric Tree</a></li>
+        <li><a href="https://leetcode.com/problems/balanced-binary-tree/"><b>110</b>Balanced Tree</a></li>
+        <li><a href="https://leetcode.com/problems/path-sum/"><b>112</b>Path Sum</a></li>
+        <li><a href="https://leetcode.com/problems/count-good-nodes-in-binary-tree/"><b>1448</b>Count Good Nodes</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch4" data-ch="4">
+      <div class="ch-head"><div class="ch-num">04</div><div><h2>Three ways to walk around a tree, and one way across it</h2><p class="ch-sub">Pre-order, in-order, post-order are one walk. Level order is a different one.</p></div></div>
+
+      <p>People learn pre-, in- and post-order as three algorithms to memorise. They're really <b>one walk</b> with three moments when you could write a node down.</p>
+
+      <div data-viz="euler"></div>
+
+      <p>So the only question is <b>when a node does its own work</b>, relative to its children:</p>
+      <div class="tablewrap"><table>
+        <tr><th>Order</th><th>Node's work happens</th><th>Use it when</th></tr>
+        <tr><td><span class="k-pre">●</span> <b>Pre-order</b></td><td>before either child</td><td>the parent must act first: copy or serialise a tree, pass a backpack down, print a folder before its contents</td></tr>
+        <tr><td><span class="k-in">●</span> <b>In-order</b></td><td>between left and right</td><td>the tree is a BST: in-order visits values in <b>sorted order</b> (chapter 5)</td></tr>
+        <tr><td><span class="k-post">●</span> <b>Post-order</b></td><td>after both children</td><td>the node needs its children's answers: heights, sizes, deleting a tree, every "report" from chapter 3</td></tr>
+      </table></div>
+
+      <p>Step through each one on the same tree. Switch between the three with the buttons at the top, and watch the <b>call stack</b>: it's the list of ancestors that are paused, each waiting for you to return so they can carry on with their next job.</p>
+      <div data-viz="traverse"></div>
+
+      <div class="callout idea"><span class="tag">The call stack is real</span><p>When recursion "returns to the parent", the computer isn't searching for the parent. It kept a stack of paused calls the whole time. That's why any recursive tree walk can be rewritten with your own <code>stack = []</code>: you're just doing the computer's bookkeeping by hand. Pre-order is the easiest to write that way (push right child, then left, so left comes out first).</p></div>
+
+      <h3>Level order: floor by floor</h3>
+      <div class="callout picture"><span class="tag">Picture it</span><p>A building inspector who must finish every room on a floor before taking the stairs down. Depth-first walks follow one corridor all the way to the basement; level order sweeps across.</p></div>
+      <p>A <b>stack</b> (last in, first out) gives depth-first. Swap it for a <b>queue</b> (first in, first out) and the same loop goes breadth-first: children added now wait behind everyone already in line, which is the rest of the current floor. The trick to know where one floor ends: <b>count the queue before you start a floor</b>. That count is exactly the floor's size.</p>
+      <div data-viz="level"></div>
+      <p>Level order answers anything about floors: right side view (last node of each floor), zigzag order, average per level, minimum depth (the first floor with a leaf), connecting each node to its right neighbour.</p>
+
+      <details class="check"><summary>Which order visits the root last? Which visits it first? <span class="hint">think, then open</span></summary><div class="ans"><p>Post-order visits the root last (everything else must finish first). Pre-order visits it first. In-order puts it between its left and right subtrees.</p></div></details>
+      <details class="check"><summary>Minimum depth: why is BFS better than DFS here? <span class="hint">think, then open</span></summary><div class="ans"><p>BFS goes floor by floor, so the first leaf it meets is the shallowest one, and it can stop right there. DFS might explore a very deep left subtree before discovering a leaf one step below the root.</p></div></details>
+      <details class="tpl"><summary>Template: level order <span class="hint">Python</span></summary><div class="ans"><pre><code>from collections import deque
+q, levels = deque([root] if root else []), []
+while q:
+    floor = []
+    for _ in range(len(q)):          # exactly this floor
+        node = q.popleft()
+        floor.append(node.val)
+        if node.left:  q.append(node.left)
+        if node.right: q.append(node.right)
+    levels.append(floor)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/binary-tree-inorder-traversal/"><b>94</b>Inorder Traversal</a></li>
+        <li><a href="https://leetcode.com/problems/binary-tree-level-order-traversal/"><b>102</b>Level Order</a></li>
+        <li><a href="https://leetcode.com/problems/binary-tree-right-side-view/"><b>199</b>Right Side View</a></li>
+        <li><a href="https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/"><b>103</b>Zigzag Level Order</a></li>
+        <li><a href="https://leetcode.com/problems/minimum-depth-of-binary-tree/"><b>111</b>Minimum Depth</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch5" data-ch="5">
+      <div class="ch-head"><div class="ch-num">05</div><div><h2>Binary search trees: a sorted shelf, folded up</h2><p class="ch-sub">One promise at every node, and what it buys you.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>"I'm thinking of a number between 1 and 100." You guess 50; I say "lower". Half the numbers just vanished. A binary search tree is that game, frozen into a shape: every node is a guess, left means "lower", right means "higher".</p></div>
+
+      <p>The promise: at <b>every</b> node, everything in the left subtree is smaller and everything in the right subtree is bigger. Not just the children, <b>everything</b>. Searching means making one comparison per floor and throwing away the side that can't hold your value:</p>
+      <div data-viz="bst"></div>
+      <p>Each step drops a whole subtree, so the cost is the tree's <b>height</b>: about log n if the tree is balanced, but n if it's a chain (insert 1, 2, 3, 4, 5 in order and you get a straight line). That's why real libraries use self-balancing trees; on LeetCode you're normally given the tree as it is.</p>
+
+      <h3>In-order is sorted</h3>
+      <p>Walk a BST in-order (left, me, right) and the values come out sorted. That's the shelf, unfolded. It turns many BST problems into list problems: the <i>k</i>-th smallest is the <i>k</i>-th node in-order; two numbers that add to a target are a two-pointer problem on the in-order list; a BST is valid exactly when its in-order walk is strictly increasing.</p>
+
+      <h3>Validating: every ancestor gets a vote</h3>
+      <div class="callout trap"><span class="tag">The classic mistake</span><p>Checking only "left child &lt; me &lt; right child" at each node. A node can satisfy its parent and still break the promise for its grandparent. Step through the broken tree below and watch which ancestor complains.</p></div>
+      <p>The fix is a <b>backpack</b> (chapter 3): hand each node a <b>window</b>, the range its value must fall inside. Going left, the parent's value becomes the new ceiling; going right, it becomes the new floor. The window only ever shrinks, carrying every ancestor's rule along.</p>
+      <div data-viz="validate"></div>
+
+      <h3>The lowest common ancestor in a BST</h3>
+      <p>Start at the root. If both values are smaller, the answer is on the left; both bigger, on the right. The first node where they <b>split</b> (one on each side, or one equals the node) is the answer. It's the same search, looking for a fork instead of a value.</p>
+
+      <details class="check"><summary>In a BST, where is the smallest value? <span class="hint">think, then open</span></summary><div class="ans"><p>Keep going left until there is no left child. That node is the minimum. (Deleting a node with two children uses this: replace it with the smallest value in its right subtree.)</p></div></details>
+      <details class="check"><summary>Kth smallest: how can you stop early? <span class="hint">think, then open</span></summary><div class="ans"><p>Walk in-order with a counter, and stop the moment the counter reaches k. You never touch the larger values on the right.</p></div></details>
+      <details class="tpl"><summary>Template: validate with a window <span class="hint">Python</span></summary><div class="ans"><pre><code>def valid(node, lo=float('-inf'), hi=float('inf')):
+    if not node:
+        return True
+    if not lo &lt; node.val &lt; hi:
+        return False
+    return valid(node.left, lo, node.val) and valid(node.right, node.val, hi)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/search-in-a-binary-search-tree/"><b>700</b>Search in a BST</a></li>
+        <li><a href="https://leetcode.com/problems/validate-binary-search-tree/"><b>98</b>Validate BST</a></li>
+        <li><a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/"><b>230</b>Kth Smallest</a></li>
+        <li><a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/"><b>235</b>LCA of a BST</a></li>
+        <li><a href="https://leetcode.com/problems/delete-node-in-a-bst/"><b>450</b>Delete Node</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch6" data-ch="6">
+      <div class="ch-head"><div class="ch-num">06</div><div><h2>Answers that bend</h2><p class="ch-sub">When what a node reports isn't the answer itself.</p></div></div>
+
+      <p>In chapter 3 the root's report was the answer. The harder tree problems break that: the thing you report up is a <i>piece</i> of the answer, and the answer itself is recorded on the side as you go. Spotting this split is the step from easy to medium and hard.</p>
+
+      <h3>Diameter: return one arm, record two</h3>
+      <div class="callout picture"><span class="tag">Picture it</span><p>Lay the tree down like a set of pipes and ask for the longest single pipe run between two ends. Every such run has a highest joint where it bends: it comes up one branch and goes down another. At that joint, the run uses <b>two</b> arms. But if you want to extend the run further up the tree, you can only bring <b>one</b> arm with you, because a pipe can't fork.</p></div>
+      <p>So each node does two different things: it <b>records</b> "left arm + right arm" as a candidate answer, and it <b>reports</b> "1 + the longer arm" to its parent. Watch the best path turn out to bend below the root:</p>
+      <div data-viz="diameter"></div>
+      <p>The same shape solves <b>Binary Tree Maximum Path Sum</b> (a famous hard): record <code>val + left + right</code>, report <code>val + max(left, right)</code>, and treat a negative arm as 0 (you'd rather not take it). And <b>Longest Univalue Path</b>: an arm only counts if the child has the same value.</p>
+
+      <h3>Lowest common ancestor: two search parties</h3>
+      <div class="callout picture"><span class="tag">Picture it</span><p>Two people are lost somewhere in a company, and every manager asks their reports, "have you seen either of them?" The first manager who hears "yes" from <b>two different directions</b> is the lowest manager above both.</p></div>
+      <div data-viz="lca"></div>
+      <p>Each node's report is one of three things: nothing, one of the targets, or the answer. Once the answer is found, it passes up unchanged, because every ancestor above it hears from only one side.</p>
+
+      <h3>Path sums: a backpack with a running total</h3>
+      <p>"Is there a root-to-leaf path adding up to <i>t</i>?" is a backpack problem: pass down <code>t − node.val</code> and check for 0 at a leaf. "Count paths that add to <i>t</i>, starting and ending anywhere going down" (Path Sum III) adds one idea from arrays: carry a <b>count of the prefix sums</b> on the current path. If the running sum is <i>s</i> and you've seen <i>s − t</i> above you <i>k</i> times, then <i>k</i> paths end here. Remove your prefix from the count as you return, because it's no longer above anyone. That clean-up on the way out is backtracking (chapter 12) appearing inside a tree problem.</p>
+
+      <h3>Building a tree from its traversals</h3>
+      <p>Pre-order always starts with the root. In-order has the root <b>in the middle</b>, with the whole left subtree before it and the whole right subtree after. So: take the first pre-order value as the root, find it in the in-order list (use a dictionary of positions so this is O(1)), and the number of values to its left tells you exactly how much of the pre-order list belongs to the left subtree. Recurse on both halves. Serialising a tree is the same idea backwards: write it out in pre-order with a marker for empty children, and read it back in the same order.</p>
+
+      <details class="check"><summary>Why can't the diameter function just return the diameter? <span class="hint">think, then open</span></summary><div class="ans"><p>Because the parent needs something else: the length of the single longest arm it could extend. A diameter that bends below a node is useless to that node's parent; you can't extend a path that already used both of its ends. So you return one thing and record the other.</p></div></details>
+      <details class="check"><summary>In Maximum Path Sum, why do we clamp arms at 0? <span class="hint">think, then open</span></summary><div class="ans"><p>An arm whose best sum is negative only makes the path worse. Taking 0 means "stop the path here and don't go down that side."</p></div></details>
+      <details class="tpl"><summary>Template: report one thing, record another <span class="hint">Python</span></summary><div class="ans"><pre><code>best = 0
+def arm(node):
+    nonlocal best          # or self.best inside a class
+    if not node:
+        return 0
+    L, R = arm(node.left), arm(node.right)
+    best = max(best, L + R)        # record: the path that bends here
+    return 1 + max(L, R)           # report: one arm only
+arm(root)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/diameter-of-binary-tree/"><b>543</b>Diameter</a></li>
+        <li><a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/"><b>236</b>LCA</a></li>
+        <li><a href="https://leetcode.com/problems/path-sum-iii/"><b>437</b>Path Sum III</a></li>
+        <li><a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/"><b>105</b>Build from Pre + In</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/binary-tree-maximum-path-sum/"><b>124</b>Max Path Sum</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree/"><b>297</b>Serialize</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <!-- ═════════════════════════ PART III -->
+    <div class="part">Part III · Graphs</div>
+
+    <section class="ch" id="ch7" data-ch="7">
+      <div class="ch-head"><div class="ch-num">07</div><div><h2>Exploring: chalk, string and ripples</h2><p class="ch-sub">Depth-first and breadth-first search, and why they find different things.</p></div></div>
+
+      <p>Walking a graph is walking a tree with one added danger: you can come back to where you've been, and walk in circles forever. The cure is a <b>visited set</b>, a chalk mark on every node you've reached. After that there are just two ways to decide where to go next.</p>
+
+      <div class="cards">
+        <div class="card"><h4>Depth-first: one explorer</h4><span class="to">stack / recursion</span><p>Theseus in the labyrinth with chalk and a ball of string. Go down any unmarked corridor, as deep as it goes. At a dead end, wind the string back to the last junction with a corridor you haven't tried.</p></div>
+        <div class="card"><h4>Breadth-first: a ripple</h4><span class="to">queue</span><p>A stone dropped in a pond, or a rumour where everyone tells their friends once per round. Everything 1 step away hears first, then everything 2 steps away. Nobody is reached before someone closer.</p></div>
+      </div>
+
+      <p>Run both on the same graph and compare the green edges at the end. BFS leaves a bushy fan of short routes. DFS leaves one long snake.</p>
+      <div data-viz="bfs"></div>
+
+      <div class="callout idea"><span class="tag">The one fact to remember</span><p><b>BFS finds shortest paths</b> when every edge costs the same, because the ripple reaches each node in the round equal to its distance. DFS doesn't: it reached H through a long detour. Use BFS for "fewest steps / moves / transformations". Use DFS when you only need to reach things or understand their structure: components, cycles, ordering, and every backtracking problem.</p></div>
+      <div class="callout trap"><span class="tag">Watch out</span><p>In BFS, chalk a node <b>when you add it to the queue</b>, not when you take it out. If you wait until it comes out, the same node can be added many times by different neighbours before its turn, which can blow up the time and give wrong distances on some problems.</p></div>
+
+      <p>Both visit every node once and look at every edge once (twice if undirected), so both cost <b>O(V + E)</b>. To recover the actual route, not just its length, store "who found me" for each node as BFS goes; at the end, follow those pointers back from the target, like breadcrumbs.</p>
+
+      <h3>When the graph is hidden</h3>
+      <p>Often nobody hands you a graph. In <b>Word Ladder</b>, each word is a node and two words are connected if they differ by one letter. In <b>Open the Lock</b>, each 4-digit combination is a node, and turning one wheel one notch is an edge. The question "fewest moves from A to B" is BFS on a graph you generate as you go. Learning to <b>see the graph</b> in a puzzle is most of the skill.</p>
+
+      <details class="check"><summary>You need the shortest number of moves for a knight to reach a square. DFS or BFS? <span class="hint">think, then open</span></summary><div class="ans"><p>BFS. Squares are nodes, knight moves are edges, all edges cost 1. The round in which BFS first reaches the target is the answer.</p></div></details>
+      <details class="check"><summary>Clone Graph: why do you need a dictionary from old node to new node? <span class="hint">think, then open</span></summary><div class="ans"><p>It's the visited set and the result at once. When a neighbour is already cloned, you link to its clone instead of making a second copy, which also stops you looping forever around a cycle.</p></div></details>
+      <details class="tpl"><summary>Templates: BFS and DFS on an adjacency list <span class="hint">Python</span></summary><div class="ans"><pre><code>from collections import deque
+def bfs(start):
+    dist = {start: 0}                  # chalk + distance in one
+    q = deque([start])
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if v not in dist:
+                dist[v] = dist[u] + 1  # chalk on the way IN
+                q.append(v)
+    return dist
+
+seen = set()
+def dfs(u):
+    seen.add(u)
+    for v in adj[u]:
+        if v not in seen:
+            dfs(v)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/find-if-path-exists-in-graph/"><b>1971</b>Path Exists</a></li>
+        <li><a href="https://leetcode.com/problems/clone-graph/"><b>133</b>Clone Graph</a></li>
+        <li><a href="https://leetcode.com/problems/open-the-lock/"><b>752</b>Open the Lock</a></li>
+        <li><a href="https://leetcode.com/problems/keys-and-rooms/"><b>841</b>Keys and Rooms</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/word-ladder/"><b>127</b>Word Ladder</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch8" data-ch="8">
+      <div class="ch-head"><div class="ch-num">08</div><div><h2>Grids are graphs in disguise</h2><p class="ch-sub">Flood fill, and many starting points at once.</p></div></div>
+
+      <p>A 2-D grid is the most common graph on LeetCode, and it never looks like one. Every cell is a node. Its neighbours are the cells up, down, left and right (sometimes diagonals too), as long as they're inside the grid. You don't build an adjacency list; you compute neighbours on the spot with four direction pairs.</p>
+
+      <h3>Flood fill: the paint bucket</h3>
+      <div class="callout picture"><span class="tag">Picture it</span><p>The paint-bucket tool in a drawing program: click one pixel, and the colour spreads to every touching pixel of the same colour, and from those to theirs. To count islands, scan the map; each time you find land that isn't painted yet, that's a new island, so count it and pour the bucket there.</p></div>
+      <div data-viz="islands"></div>
+      <p>The paint doubles as the visited mark: you can overwrite the grid itself (turn <code>"1"</code> into <code>"0"</code>), which saves a separate set. Ask first in an interview whether you're allowed to change the input.</p>
+
+      <h3>Many sources: drop all the stones at once</h3>
+      <p>"How far is each cell from the <i>nearest</i> X?" sounds like one BFS per X. It isn't. Put <b>every</b> X in the queue at the start, at distance 0, and run one BFS. The ripples spread together, and each cell is claimed by whichever ripple reaches it first, which is the nearest X. This is <b>multi-source BFS</b>.</p>
+      <div data-viz="oranges"></div>
+      <p>The same move solves Walls and Gates, 01 Matrix, As Far from Land as Possible, and Pacific Atlantic Water Flow (which also uses a second trick: <b>search backwards</b>, from the oceans uphill, instead of from every cell downhill).</p>
+
+      <div class="callout trap"><span class="tag">Watch out</span><p>Check bounds <b>before</b> you read the cell: <code>0 &lt;= r &lt; rows and 0 &lt;= c &lt; cols</code>. In Python, <code>grid[-1]</code> doesn't crash; it quietly reads the last row, and your flood fill wraps around the map.</p></div>
+      <details class="check"><summary>Surrounded Regions: capture every O region not touching the border. What's the trick? <span class="hint">think, then open</span></summary><div class="ans"><p>Reverse the question. Flood-fill from every O <b>on the border</b> and mark those as safe. Every O you didn't reach is surrounded; flip it. Starting from the border is much easier than checking each region for "does it escape?".</p></div></details>
+      <details class="tpl"><summary>Template: grid neighbours <span class="hint">Python</span></summary><div class="ans"><pre><code>R, C = len(grid), len(grid[0])
+for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+    nr, nc = r + dr, c + dc
+    if 0 &lt;= nr &lt; R and 0 &lt;= nc &lt; C and grid[nr][nc] == "1":
+        ...</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/number-of-islands/"><b>200</b>Number of Islands</a></li>
+        <li><a href="https://leetcode.com/problems/max-area-of-island/"><b>695</b>Max Area of Island</a></li>
+        <li><a href="https://leetcode.com/problems/rotting-oranges/"><b>994</b>Rotting Oranges</a></li>
+        <li><a href="https://leetcode.com/problems/01-matrix/"><b>542</b>01 Matrix</a></li>
+        <li><a href="https://leetcode.com/problems/surrounded-regions/"><b>130</b>Surrounded Regions</a></li>
+        <li><a href="https://leetcode.com/problems/pacific-atlantic-water-flow/"><b>417</b>Pacific Atlantic</a></li>
+        <li><a href="https://leetcode.com/problems/shortest-path-in-binary-matrix/"><b>1091</b>Shortest Path in Matrix</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch9" data-ch="9">
+      <div class="ch-head"><div class="ch-num">09</div><div><h2>Order and cycles</h2><p class="ch-sub">Topological sort, and how to tell when an order is impossible.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>Getting dressed. Socks before shoes. Trousers before shoes and belt. Shirt before tie, tie before jacket. Some things don't care about each other: socks and shirt can go in either order. A <b>topological order</b> is any sequence of getting dressed that never puts on shoes before socks.</p></div>
+
+      <p>These "must come before" arrows form a directed graph. An order exists exactly when the graph has <b>no cycle</b>: if A needs B, B needs C, and C needs A, nobody can go first. Course Schedule is this question in its purest form.</p>
+
+      <h3>Kahn's method: who's free to go?</h3>
+      <p>Count, for every item, how many arrows point into it: how many things it's still waiting for (its <b>in-degree</b>). Anything waiting for nothing can go now. Each time you place an item, cross out its outgoing arrows. Things it was blocking now wait for one fewer, and any that reach zero join the "ready" queue.</p>
+      <div data-viz="kahn"></div>
+      <p>The cycle test comes for free: if the queue runs dry before every item is placed, the leftovers are all waiting on each other. They're in (or stuck behind) a cycle.</p>
+
+      <h3>DFS with three colours: a trail of footprints</h3>
+      <p>The depth-first way to find a cycle needs one more idea than "visited". As you walk, leave footprints on your <b>current trail</b>. If you step onto a footprint, you've walked in a circle. When you back out of a node, wipe its footprint and mark it <b>finished</b> instead. Reaching a finished node isn't a cycle: it's just a second road into somewhere you've already fully explored.</p>
+      <div data-viz="colors"></div>
+      <p>Bonus: if you write each node down at the moment it turns <b>black</b> (finished), and reverse that list, you get a topological order. Post-order again: a node is done only after everything that depends on it is done.</p>
+
+      <div class="callout trap"><span class="tag">Watch out</span><p>Undirected graphs are different. There, every edge looks like a "loop back" to the node you just came from. To find a real cycle in an undirected graph, skip the edge back to your own parent, or use Union-Find (next chapter), which is simpler.</p></div>
+
+      <details class="check"><summary>Kahn placed 5 of 7 courses and the queue is empty. What does that tell you? <span class="hint">think, then open</span></summary><div class="ans"><p>The prerequisites contain a cycle, so the schedule is impossible. The 2 unplaced courses are in the cycle or depend on something in it.</p></div></details>
+      <details class="check"><summary>Alien Dictionary: you're given words sorted in an unknown alphabet. Where's the graph? <span class="hint">think, then open</span></summary><div class="ans"><p>Compare each pair of neighbouring words; the first position where they differ gives one edge, "this letter comes before that one". Topologically sort the letters. A cycle means the input is contradictory.</p></div></details>
+      <details class="tpl"><summary>Template: Kahn's topological sort <span class="hint">Python</span></summary><div class="ans"><pre><code>from collections import deque
+indeg = {u: 0 for u in nodes}
+for u in nodes:
+    for v in adj[u]:
+        indeg[v] += 1
+q = deque(u for u in nodes if indeg[u] == 0)
+order = []
+while q:
+    u = q.popleft()
+    order.append(u)
+    for v in adj[u]:
+        indeg[v] -= 1
+        if indeg[v] == 0:
+            q.append(v)
+has_cycle = len(order) &lt; len(nodes)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/course-schedule/"><b>207</b>Course Schedule</a></li>
+        <li><a href="https://leetcode.com/problems/course-schedule-ii/"><b>210</b>Course Schedule II</a></li>
+        <li><a href="https://leetcode.com/problems/find-eventual-safe-states/"><b>802</b>Eventual Safe States</a></li>
+        <li><a href="https://leetcode.com/problems/minimum-height-trees/"><b>310</b>Minimum Height Trees</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/parallel-courses-iii/"><b>2050</b>Parallel Courses III</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch10" data-ch="10">
+      <div class="ch-head"><div class="ch-num">10</div><div><h2>Union-Find: clubs and presidents</h2><p class="ch-sub">Answering "are these two connected?" while edges keep arriving.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>Everyone belongs to a club, and each club has a president. You don't know your president directly; you know your boss, who knows theirs, and so on up to someone who is their own boss. Two people are in the same club exactly when their chains end at the same president. Merging two clubs is one handshake: one president agrees to report to the other.</p></div>
+
+      <p>BFS and DFS answer connectivity questions about a graph you already have. <b>Union-Find</b> (also called Disjoint Set Union) shines when edges arrive <b>one at a time</b> and you need to answer "connected yet?" after each. It has two operations:</p>
+      <ul>
+        <li><b>find(x)</b>: follow bosses up to the president.</li>
+        <li><b>union(a, b)</b>: find both presidents; if they differ, make one report to the other.</li>
+      </ul>
+      <p>Two small habits make it nearly instant. <b>Path compression</b>: after a find, everyone on the chain is told the president directly, so next time it's one hop. <b>Union by size</b>: the smaller club joins the bigger one, so chains stay short.</p>
+      <div data-viz="uf"></div>
+
+      <div class="callout cues"><span class="tag">Reach for it when you see</span><p>"Number of connected components / provinces", "does adding this edge create a cycle?" (union finds the same president: yes), accounts or emails that should be merged, "connect all points as cheaply as possible" (Kruskal, next chapter), and anything where edges are added over time.</p></div>
+
+      <details class="check"><summary>Redundant Connection: which edge makes a tree into a graph with a cycle? <span class="hint">think, then open</span></summary><div class="ans"><p>Union the edges one by one. The first edge whose two ends already have the same president connects two nodes that were already connected: that's the redundant one.</p></div></details>
+      <details class="tpl"><summary>Template: Union-Find <span class="hint">Python</span></summary><div class="ans"><pre><code>parent = list(range(n))
+size = [1] * n
+def find(x):
+    while parent[x] != x:
+        parent[x] = parent[parent[x]]   # compress (halving)
+        x = parent[x]
+    return x
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra == rb:
+        return False                  # already connected
+    if size[ra] &lt; size[rb]:
+        ra, rb = rb, ra
+    parent[rb] = ra
+    size[ra] += size[rb]
+    return True</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/number-of-provinces/"><b>547</b>Number of Provinces</a></li>
+        <li><a href="https://leetcode.com/problems/redundant-connection/"><b>684</b>Redundant Connection</a></li>
+        <li><a href="https://leetcode.com/problems/accounts-merge/"><b>721</b>Accounts Merge</a></li>
+        <li><a href="https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/"><b>947</b>Most Stones Removed</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/swim-in-rising-water/"><b>778</b>Swim in Rising Water</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch11" data-ch="11">
+      <div class="ch-head"><div class="ch-num">11</div><div><h2>Roads with lengths</h2><p class="ch-sub">Dijkstra, its cousins, and the cheapest way to connect everything.</p></div></div>
+
+      <p>BFS finds shortest paths only when every edge costs the same. Give roads different lengths and the route with the fewest roads isn't the shortest any more. You need to always expand the <b>closest</b> unfinished place, not the oldest one in line. Swap the queue for a <b>priority queue</b> (a heap) and BFS becomes Dijkstra.</p>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>Pour water into the pipe network at A. It spreads through every pipe at the same speed, so it reaches each junction by the shortest route, in order of distance. Dijkstra simulates the water: the next junction to get wet is always the closest dry one.</p></div>
+
+      <div data-viz="dijkstra"></div>
+
+      <p>Why is a settled distance final? When a place comes off the heap as the closest unsettled one, any other route to it would have to leave the settled area through some other unsettled place, which is already at least as far, and roads can only add length. That argument breaks if a road can have a <b>negative</b> length; then Dijkstra can be wrong, and you need Bellman-Ford.</p>
+      <div class="callout idea"><span class="tag">Lazy deletion</span><p>Python's heap can't lower a value already inside it. So when a shorter route turns up, push a <b>new ticket</b> and leave the old one. When an old ticket comes out later, its place is already settled, so throw it away (the crossed-out tickets in the panel). Total cost: <b>O(E log E)</b>.</p></div>
+
+      <h3>The family of shortest paths</h3>
+      <div class="tablewrap"><table>
+        <tr><th>Situation</th><th>Use</th><th>Cost</th></tr>
+        <tr><td>All edges cost the same</td><td>BFS</td><td>O(V + E)</td></tr>
+        <tr><td>Edges cost 0 or 1</td><td>0-1 BFS: a deque, push 0-edges to the front and 1-edges to the back</td><td>O(V + E)</td></tr>
+        <tr><td>Non-negative weights</td><td>Dijkstra (heap)</td><td>O(E log V)</td></tr>
+        <tr><td>Negative weights, or "at most k edges"</td><td>Bellman-Ford: relax every edge, k (or V − 1) rounds</td><td>O(k · E)</td></tr>
+        <tr><td>Every pair of nodes, small V</td><td>Floyd-Warshall: "can going through k make i → j shorter?" for every k</td><td>O(V³)</td></tr>
+        <tr><td>A DAG</td><td>Relax edges in topological order (it's DP, chapter 14)</td><td>O(V + E)</td></tr>
+      </table></div>
+      <p><b>Cheapest Flights Within K Stops</b> is the classic trap: Dijkstra by price alone can throw away a route with fewer stops. Bellman-Ford with exactly k + 1 rounds counts stops naturally (copy the distances each round so one round can't use two new edges).</p>
+      <p>"Minimum effort" or "lowest maximum height" problems are Dijkstra with a different idea of a route's cost: the <b>largest</b> step along it instead of the sum. Anything where extending a route can't make it cheaper works.</p>
+
+      <h3>Minimum spanning tree: building roads</h3>
+      <div class="callout picture"><span class="tag">Picture it</span><p>You must connect every town with roads, as cheaply as possible. Sort all possible roads by cost and build the cheapest first, but <b>never build a road between two towns that are already connected</b>; it would be wasted money (a cycle). Stop after n − 1 roads.</p></div>
+      <p>That's <b>Kruskal's algorithm</b>, and "already connected?" is exactly Union-Find's question. <b>Prim's algorithm</b> grows one connected region instead, like Dijkstra, always adding the cheapest road leaving it. Both give the same total.</p>
+
+      <details class="check"><summary>Network Delay Time: a signal leaves node k. When has every node heard it? <span class="hint">think, then open</span></summary><div class="ans"><p>Run Dijkstra from k. The answer is the <b>largest</b> final distance, since the last node to hear it is the farthest one. If any node is still at infinity, return −1.</p></div></details>
+      <details class="check"><summary>Why does Dijkstra skip a ticket for an already-settled node instead of processing it? <span class="hint">think, then open</span></summary><div class="ans"><p>It's an older, worse ticket for a place whose shortest distance is already final. Processing it would only try longer routes onward, wasting time.</p></div></details>
+      <details class="tpl"><summary>Template: Dijkstra <span class="hint">Python</span></summary><div class="ans"><pre><code>import heapq
+dist = {src: 0}
+heap = [(0, src)]
+while heap:
+    d, u = heapq.heappop(heap)
+    if d &gt; dist.get(u, float('inf')):
+        continue                          # stale ticket
+    for v, w in adj[u]:
+        nd = d + w
+        if nd &lt; dist.get(v, float('inf')):
+            dist[v] = nd
+            heapq.heappush(heap, (nd, v))</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/network-delay-time/"><b>743</b>Network Delay Time</a></li>
+        <li><a href="https://leetcode.com/problems/path-with-minimum-effort/"><b>1631</b>Minimum Effort</a></li>
+        <li><a href="https://leetcode.com/problems/cheapest-flights-within-k-stops/"><b>787</b>Cheapest Flights, K Stops</a></li>
+        <li><a href="https://leetcode.com/problems/min-cost-to-connect-all-points/"><b>1584</b>Connect All Points</a></li>
+        <li><a href="https://leetcode.com/problems/path-with-maximum-probability/"><b>1514</b>Max Probability</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <!-- ═════════════════════════ PART IV -->
+    <div class="part">Part IV · Search and memory</div>
+
+    <section class="ch" id="ch12" data-ch="12">
+      <div class="ch-head"><div class="ch-num">12</div><div><h2>Backtracking: choose, explore, un-choose</h2><p class="ch-sub">Depth-first search on a tree that only exists in your head.</p></div></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>Trying on outfits for every combination of three items. Put on the hat. Now, with the hat on, try with and without the scarf. When you've seen everything with the hat, <b>take the hat off</b> before trying everything without it. Forget to take it off and every later outfit has a hat in it.</p></div>
+
+      <p>Every backtracking problem builds an answer one decision at a time, and every sequence of decisions is a path in a <b>decision tree</b>. The tree is never stored. You walk it depth-first while holding just one path in your hands, and the walk follows three beats:</p>
+      <ol>
+        <li><b>Choose</b>: make one decision (append to the path).</li>
+        <li><b>Explore</b>: recurse to make the rest of the decisions.</li>
+        <li><b>Un-choose</b>: undo the decision (pop) so the next option starts from the same state.</li>
+      </ol>
+      <div data-viz="subsets"></div>
+
+      <div class="callout trap"><span class="tag">Watch out</span><p>When you record an answer, record a <b>copy</b>: <code>out.append(path[:])</code>. The path is one list that keeps changing. Append the list itself and every recorded answer will be the same list, which is empty by the end.</p></div>
+
+      <h3>Four shapes of decision tree</h3>
+      <p>Most backtracking problems are one of these. What changes is what a single decision is, and when a path counts as finished.</p>
+      <div class="tablewrap"><table>
+        <tr><th>Family</th><th>One decision</th><th>Record when</th><th>Size</th></tr>
+        <tr><td><b>Subsets</b></td><td>take or skip the next item</td><td>every item decided</td><td>2ⁿ</td></tr>
+        <tr><td><b>Combinations</b></td><td>pick an item <i>at or after</i> index <code>start</code> (so {1,2} and {2,1} aren't both made)</td><td>path has k items, or hits the target sum</td><td>C(n, k)</td></tr>
+        <tr><td><b>Permutations</b></td><td>pick any item <i>not used yet</i> (keep a <code>used</code> set)</td><td>path has all n items</td><td>n!</td></tr>
+        <tr><td><b>Partitions / grid paths</b></td><td>where to cut next, or which neighbour to step to (mark the cell, unmark on the way back)</td><td>reached the end of the string / found the word</td><td>varies</td></tr>
+      </table></div>
+      <p><b>Duplicates in the input</b> (Subsets II, Combination Sum II, Permutations II): sort first, then at any one level of the tree, skip an item equal to the one just tried at that same level. Identical siblings would grow identical subtrees.</p>
+
+      <h3>Pruning: don't walk down a corridor you know is a dead end</h3>
+      <p>The decision tree is exponential, so the whole game is cutting branches early. Check a choice <b>before</b> recursing, and skip it if it can't possibly lead to an answer: the queen is attacked, the sum already went past the target, the word doesn't start with these letters. Each cut removes an entire subtree.</p>
+      <div data-viz="queens"></div>
+
+      <div class="callout idea"><span class="tag">Cost</span><p>Backtracking time is roughly <b>(nodes in the decision tree) × (work per node)</b>. Subsets: 2ⁿ · n. Permutations: n! · n. Constraints of n ≤ 10 to 20 on LeetCode are a strong hint that exponential backtracking is expected.</p></div>
+
+      <details class="check"><summary>Why do combinations use a <code>start</code> index but permutations use a <code>used</code> set? <span class="hint">think, then open</span></summary><div class="ans"><p>In combinations, order doesn't matter, so you only ever pick items <i>after</i> the last one you picked, which makes each set appear once, in increasing order. In permutations, order is the whole point, so any unused item can come next.</p></div></details>
+      <details class="check"><summary>Word Search: why must you unmark a cell when you return from it? <span class="hint">think, then open</span></summary><div class="ans"><p>The mark means "used on the <i>current</i> path". A different path, tried later, may legitimately pass through that cell. Leaving it marked would block it forever. Un-choose.</p></div></details>
+      <details class="tpl"><summary>Template: the backtracking skeleton <span class="hint">Python</span></summary><div class="ans"><pre><code>out, path = [], []
+def bt(start):
+    if finished(path):
+        out.append(path[:])        # a copy!
+        return
+    for i in range(start, len(nums)):
+        if not allowed(i):         # prune
+            continue
+        path.append(nums[i])       # choose
+        bt(i + 1)                  # explore
+        path.pop()                 # un-choose
+bt(0)</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/subsets/"><b>78</b>Subsets</a></li>
+        <li><a href="https://leetcode.com/problems/permutations/"><b>46</b>Permutations</a></li>
+        <li><a href="https://leetcode.com/problems/combination-sum/"><b>39</b>Combination Sum</a></li>
+        <li><a href="https://leetcode.com/problems/subsets-ii/"><b>90</b>Subsets II</a></li>
+        <li><a href="https://leetcode.com/problems/generate-parentheses/"><b>22</b>Generate Parentheses</a></li>
+        <li><a href="https://leetcode.com/problems/word-search/"><b>79</b>Word Search</a></li>
+        <li><a href="https://leetcode.com/problems/palindrome-partitioning/"><b>131</b>Palindrome Partitioning</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/n-queens/"><b>51</b>N-Queens</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch13" data-ch="13">
+      <div class="ch-head"><div class="ch-num">13</div><div><h2>Dynamic programming: backtracking with a memory</h2><p class="ch-sub">When the decision tree keeps asking the same question.</p></div></div>
+
+      <p>Backtracking explores every path because every path is a different answer. But many problems only want <b>one number</b>: the best, the cheapest, how many. Then two paths that reach the <b>same situation</b> have the same future, and working that future out twice is pure waste. Watch how often the plain recursion recomputes the same thing:</p>
+      <div data-viz="fib"></div>
+
+      <div class="callout picture"><span class="tag">Picture it</span><p>A building full of rooms, each with a question on the door. To answer a door's question you need the answers from a couple of other doors. The first time you work one out, you stick a note with the answer on that door. Every later visitor reads the note instead of going inside. That's <b>memoisation</b>, and it's the whole trick.</p></div>
+
+      <h3>The state is a bookmark</h3>
+      <p>In a choose-your-own-adventure book, two readers who reach page 74 by different routes have exactly the same story ahead of them. The page number is all the book needs to know about the past. In DP, that bookmark is called the <b>state</b>: the smallest set of facts about "where you are" that decides everything still to come. Finding the state is the hard part of every DP problem. The rest is mechanical.</p>
+
+      <h3>Five questions that design any DP</h3>
+      <ol>
+        <li><b>State</b>: what does <code>dp(i)</code> or <code>dp(i, j)</code> mean, in one plain sentence? ("the fewest coins that make amount <i>a</i>", "the longest common subsequence of the first <i>i</i> letters of one word and the first <i>j</i> of the other").</li>
+        <li><b>Choices</b>: from this state, what can the last (or next) decision be?</li>
+        <li><b>Recurrence</b>: the answer in terms of smaller states, one per choice, combined with min, max or sum.</li>
+        <li><b>Base cases</b>: the smallest states, answered directly.</li>
+        <li><b>Order</b>: an order of filling in which every state's ingredients are already done.</li>
+      </ol>
+
+      <h3>Top-down or bottom-up?</h3>
+      <div class="cards">
+        <div class="card"><h4>Top-down (memo)</h4><span class="to">@cache</span><p>Write the plain recursion, then remember answers. Easy to get right, only visits states it needs. In Python, one decorator does it.</p></div>
+        <div class="card"><h4>Bottom-up (table)</h4><span class="to">dp = [...]</span><p>Fill a table from the smallest states up. No recursion limit, often lets you keep only the last row or two, so less memory.</p></div>
+      </div>
+      <p>Same answers, same idea. A sensible habit: write it top-down first (it's the recurrence written out), convert to bottom-up only if recursion depth or memory becomes a problem.</p>
+
+      <h3>A table you can see: counting routes</h3>
+      <div data-viz="griddp"></div>
+
+      <h3>The DP families</h3>
+      <div class="tablewrap"><table>
+        <tr><th>Family</th><th>State usually looks like</th><th>Examples</th></tr>
+        <tr><td><b>1-D sequence</b></td><td><code>dp[i]</code>: best answer for the first i items, or ending at item i</td><td>Climbing Stairs, House Robber, Longest Increasing Subsequence, Word Break, Decode Ways</td></tr>
+        <tr><td><b>Grid</b></td><td><code>dp[r][c]</code>: best way to reach this cell</td><td>Unique Paths, Minimum Path Sum, Maximal Square</td></tr>
+        <tr><td><b>Two sequences</b></td><td><code>dp[i][j]</code>: answer for prefixes of length i and j</td><td>Longest Common Subsequence, Edit Distance, Interleaving String</td></tr>
+        <tr><td><b>Knapsack</b></td><td><code>dp[a]</code>: best for a budget / target a, items considered one by one</td><td>Coin Change, Partition Equal Subset Sum, Target Sum</td></tr>
+        <tr><td><b>Intervals</b></td><td><code>dp[l][r]</code>: answer for the slice l..r, trying every split point</td><td>Longest Palindromic Subsequence, Burst Balloons</td></tr>
+        <tr><td><b>Trees and DAGs</b></td><td>a node's answer from its children's answers</td><td>House Robber III, Longest Increasing Path in a Matrix (chapter 14)</td></tr>
+        <tr><td><b>Bitmask</b></td><td><code>dp[mask][i]</code>: which items are used so far, and where you are</td><td>Shortest Path Visiting All Nodes, small travelling salesman</td></tr>
+      </table></div>
+
+      <details class="check"><summary>Coin Change: what's the state, and what's the choice? <span class="hint">think, then open</span></summary><div class="ans"><p>State: <code>dp[a]</code> = the fewest coins that make amount a. Choice: which coin is the last one used. So <code>dp[a] = 1 + min(dp[a − c])</code> over every coin c ≤ a, with <code>dp[0] = 0</code>. Fill a from 0 upward.</p></div></details>
+      <details class="check"><summary>When is a problem DP and not backtracking? <span class="hint">think, then open</span></summary><div class="ans"><p>When it asks for one value (count, min, max, true/false) rather than every arrangement, <i>and</i> different paths of decisions reach the same state. If it asks you to list all the answers, you're backtracking; there's no shortcut around producing each one.</p></div></details>
+      <details class="tpl"><summary>Template: top-down with a cache <span class="hint">Python</span></summary><div class="ans"><pre><code>from functools import cache
+@cache
+def dp(i):
+    if i &gt;= n:                     # base case
+        return 0
+    take = nums[i] + dp(i + 2)     # one choice
+    skip = dp(i + 1)               # the other
+    return max(take, skip)
+answer = dp(0)                     # House Robber</code></pre></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/climbing-stairs/"><b>70</b>Climbing Stairs</a></li>
+        <li><a href="https://leetcode.com/problems/house-robber/"><b>198</b>House Robber</a></li>
+        <li><a href="https://leetcode.com/problems/coin-change/"><b>322</b>Coin Change</a></li>
+        <li><a href="https://leetcode.com/problems/unique-paths-ii/"><b>63</b>Unique Paths II</a></li>
+        <li><a href="https://leetcode.com/problems/longest-increasing-subsequence/"><b>300</b>LIS</a></li>
+        <li><a href="https://leetcode.com/problems/word-break/"><b>139</b>Word Break</a></li>
+        <li><a href="https://leetcode.com/problems/longest-common-subsequence/"><b>1143</b>LCS</a></li>
+        <li><a href="https://leetcode.com/problems/edit-distance/"><b>72</b>Edit Distance</a></li>
+        <li><a href="https://leetcode.com/problems/partition-equal-subset-sum/"><b>416</b>Partition Subset Sum</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/burst-balloons/"><b>312</b>Burst Balloons</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch14" data-ch="14">
+      <div class="ch-head"><div class="ch-num">14</div><div><h2>DP on trees and graphs</h2><p class="ch-sub">Where the two halves of this guide turn out to be one.</p></div></div>
+
+      <p>Here's the idea that ties the whole guide together. Draw every DP state as a node, and draw an arrow from each state to the states it depends on. Because a state never depends on itself, there are no cycles: <b>every DP is a DAG</b>.</p>
+      <div data-viz="stairs"></div>
+      <p>Seen that way:</p>
+      <ul>
+        <li><b>Bottom-up filling order</b> is a topological order of the state graph (chapter 9).</li>
+        <li><b>Top-down memo</b> is DFS on the state graph, with the sticky notes as the visited set (chapter 7).</li>
+        <li><b>"Minimum cost" DP</b> is a shortest path in the state graph, and "maximum" is a longest path, which is easy only because the graph is a DAG.</li>
+        <li>If the state graph <b>has cycles</b> (you can return to a state), plain DP fails, and you need a graph algorithm instead: BFS for fewest moves, Dijkstra for cheapest.</li>
+      </ul>
+
+      <h3>Tree DP: every node reports more than one number</h3>
+      <p>On a tree, the subtrees are the subproblems, and post-order is the filling order. The new trick: when a parent's options depend on a choice the child made, the child reports <b>one answer per choice</b>. In House Robber III, a parent can only be robbed if its children weren't, so each child reports both "best if I'm robbed" and "best if I'm skipped".</p>
+      <div data-viz="robber"></div>
+      <p>The same pattern appears in Binary Tree Cameras (each node reports one of three states: has a camera, is covered, needs cover) and in the diameter and max path sum problems of chapter 6, which were tree DP all along.</p>
+
+      <h3>Memoised DFS on a grid</h3>
+      <p><b>Longest Increasing Path in a Matrix</b> looks like a graph search with no obvious start. But an edge only goes from a smaller cell to a bigger one, so the cells form a DAG. <code>dp(cell)</code> = 1 + the best <code>dp</code> among bigger neighbours, memoised. Each cell is computed once, O(rows × cols), and no visited set is needed because you can never loop back to a smaller value.</p>
+
+      <h3>Bellman-Ford is DP too</h3>
+      <p>State: <code>best[k][v]</code> = cheapest way to reach v using at most k edges. Choice: the last edge used. That's why "within K stops" fits it so well: the number of stops is literally part of the state.</p>
+
+      <details class="check"><summary>Why does Longest Increasing Path need no visited set but Number of Islands does? <span class="hint">think, then open</span></summary><div class="ans"><p>Islands moves between equal cells (land to land), so it can walk in circles. Increasing Path only steps to strictly bigger values, so a cycle is impossible: the graph is a DAG, and the memo alone stops repeated work.</p></div></details>
+      <details class="check"><summary>Binary Tree Cameras: why can't each node just report "how many cameras below me"? <span class="hint">think, then open</span></summary><div class="ans"><p>The parent also needs to know whether its child has a camera (which covers the parent) or needs the parent to cover it. A count alone doesn't say. The state has to carry the choice, just like rob/skip.</p></div></details>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/house-robber-iii/"><b>337</b>House Robber III</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix/"><b>329</b>Longest Increasing Path</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/binary-tree-cameras/"><b>968</b>Binary Tree Cameras</a></li>
+        <li><a href="https://leetcode.com/problems/unique-binary-search-trees/"><b>96</b>Unique BSTs</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/shortest-path-visiting-all-nodes/"><b>847</b>Visit All Nodes</a></li>
+      </ul>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <!-- ═════════════════════════ PART V -->
+    <div class="part">Part V · Putting it together</div>
+
+    <section class="ch" id="ch15" data-ch="15">
+      <div class="ch-head"><div class="ch-num">15</div><div><h2>Which tool? Reading the problem</h2><p class="ch-sub">The words in a problem statement that point to a technique.</p></div></div>
+      <p>Half of a hard problem is noticing which chapter it belongs to. These cues aren't rules, but they're right far more often than not.</p>
+      <div class="cards">
+        <div class="card"><h4>"fewest steps / moves / transformations"</h4><span class="to">BFS</span><p>Equal-cost edges. If the graph is hidden (words, lock combinations, board states), generate neighbours on the fly.</p></div>
+        <div class="card"><h4>"distance to the nearest …"</h4><span class="to">multi-source BFS</span><p>Put every source in the queue at once.</p></div>
+        <div class="card"><h4>"cheapest / shortest" with weights</h4><span class="to">Dijkstra</span><p>Non-negative weights. A limit on stops or edges: Bellman-Ford.</p></div>
+        <div class="card"><h4>"prerequisites", "order", "dependencies"</h4><span class="to">topological sort</span><p>Kahn's in-degrees. "Possible at all?" means "is there a cycle?".</p></div>
+        <div class="card"><h4>"connected", "groups", "merge", edges added over time</h4><span class="to">Union-Find</span><p>Or one DFS/BFS per component if the graph is fixed.</p></div>
+        <div class="card"><h4>"count the regions / islands"</h4><span class="to">flood fill</span><p>Scan, and start a DFS or BFS at each unvisited cell.</p></div>
+        <div class="card"><h4>"all", "every", "list each" arrangement</h4><span class="to">backtracking</span><p>Choose, explore, un-choose. Small n (≤ 20) confirms it.</p></div>
+        <div class="card"><h4>"how many ways", "minimum", "maximum", "can you"</h4><span class="to">DP</span><p>If choices lead back to the same situation. Find the bookmark.</p></div>
+        <div class="card"><h4>tree: "path", "longest", "between any two nodes"</h4><span class="to">report one, record one</span><p>Diameter shape. Return an arm, record the bend.</p></div>
+        <div class="card"><h4>tree: depends on ancestors</h4><span class="to">backpack (top-down)</span><p>Pass the running sum, max, or valid range down.</p></div>
+        <div class="card"><h4>tree: "per level", "right side", "minimum depth"</h4><span class="to">level order</span><p>Count the queue before each floor.</p></div>
+        <div class="card"><h4>BST: "k-th", "sorted", "closest"</h4><span class="to">in-order</span><p>The shelf, unfolded. Or walk down discarding half.</p></div>
+      </div>
+      <div class="callout idea"><span class="tag">Constraints are a hint</span><p>n ≤ 10: n! is fine (permutations). n ≤ 20: 2ⁿ is fine (subsets, bitmask DP). n ≤ 500: O(n³) is fine (interval DP, Floyd-Warshall). n ≤ 10⁴: O(n²) DP. n ≤ 10⁵ or more: O(n log n) or O(n), so BFS/DFS, Dijkstra, Union-Find, a single tree pass.</p></div>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch16" data-ch="16">
+      <div class="ch-head"><div class="ch-num">16</div><div><h2>Cheat sheet</h2><p class="ch-sub">Costs, and the bugs everyone writes once.</p></div></div>
+      <div class="tablewrap"><table>
+        <tr><th>Technique</th><th>Time</th><th>Extra space</th><th>Holds in its hands</th></tr>
+        <tr><td>Tree recursion (any order)</td><td>O(n)</td><td>O(h)</td><td>the call stack</td></tr>
+        <tr><td>Level order</td><td>O(n)</td><td>O(widest floor)</td><td>a queue</td></tr>
+        <tr><td>BST search / insert</td><td>O(h)</td><td>O(1) iterative</td><td>one pointer</td></tr>
+        <tr><td>BFS / DFS on a graph</td><td>O(V + E)</td><td>O(V)</td><td>queue or stack, and a visited set</td></tr>
+        <tr><td>Grid flood fill</td><td>O(R · C)</td><td>O(R · C)</td><td>the grid itself as the visited mark</td></tr>
+        <tr><td>Topological sort</td><td>O(V + E)</td><td>O(V)</td><td>in-degree counts and a queue</td></tr>
+        <tr><td>Union-Find (both tricks)</td><td>≈ O(1) per operation</td><td>O(n)</td><td>a parent array</td></tr>
+        <tr><td>Dijkstra</td><td>O(E log V)</td><td>O(V + E)</td><td>a heap of tickets</td></tr>
+        <tr><td>Backtracking</td><td>(tree size) × (work per node)</td><td>O(depth)</td><td>one path</td></tr>
+        <tr><td>DP</td><td>(number of states) × (choices per state)</td><td>number of states, often less</td><td>a table or a cache</td></tr>
+      </table></div>
+      <h3>Bugs everyone writes once</h3>
+      <div class="tablewrap"><table>
+        <tr><th>Symptom</th><th>Likely cause</th></tr>
+        <tr><td>Infinite loop or <code>RecursionError</code> on a graph</td><td>No visited set, or you check it but never add to it.</td></tr>
+        <tr><td><code>RecursionError</code> on a big tree</td><td>A deep chain; raise the limit or use your own stack.</td></tr>
+        <tr><td>BFS gives the wrong distance or is slow</td><td>Marking visited when popping instead of when pushing.</td></tr>
+        <tr><td>Some neighbours never get visited</td><td>Undirected edge added in only one direction.</td></tr>
+        <tr><td>Flood fill wraps around the map</td><td>Negative indexes in Python; check bounds before reading.</td></tr>
+        <tr><td>Validate BST accepts a broken tree</td><td>Only comparing with the parent, not with a window from every ancestor.</td></tr>
+        <tr><td>Every backtracking answer is the same (often empty)</td><td>Appending <code>path</code> instead of <code>path[:]</code>.</td></tr>
+        <tr><td>Backtracking answers have leftovers in them</td><td>Forgot to un-choose (pop, or unmark the cell).</td></tr>
+        <tr><td>Duplicate combinations</td><td>No <code>start</code> index, or duplicates in the input not skipped at the same level.</td></tr>
+        <tr><td>Memo DP is still slow</td><td>The cache key is missing part of the state, or includes a mutable list.</td></tr>
+        <tr><td>Bottom-up DP reads garbage</td><td>Filling order doesn't finish a state's ingredients first.</td></tr>
+        <tr><td>Dijkstra is wrong</td><td>A negative edge; or a stop/step limit that Dijkstra doesn't track.</td></tr>
+        <tr><td>Diameter / path sum too small</td><td>Returned the answer instead of recording it; the best path bends below the root.</td></tr>
+      </table></div>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+
+    <section class="ch" id="ch17" data-ch="17">
+      <div class="ch-head"><div class="ch-num">17</div><div><h2>Practice ladder</h2><p class="ch-sub">A mixed list, deliberately not sorted by topic.</p></div></div>
+      <p>Each chapter's own problems tell you which tool to use. These don't. Interleaving like this is how you train the part that real interviews test: recognising the tool. For each one, write down the chapter you think it belongs to before you start. If you get stuck, come back to that chapter's animation and step through it again.</p>
+      <h3>Rung 1</h3>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/binary-tree-right-side-view/"><b>199</b>Right Side View</a></li>
+        <li><a href="https://leetcode.com/problems/max-area-of-island/"><b>695</b>Max Area of Island</a></li>
+        <li><a href="https://leetcode.com/problems/combination-sum/"><b>39</b>Combination Sum</a></li>
+        <li><a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/"><b>230</b>Kth Smallest in BST</a></li>
+        <li><a href="https://leetcode.com/problems/course-schedule/"><b>207</b>Course Schedule</a></li>
+        <li><a href="https://leetcode.com/problems/house-robber/"><b>198</b>House Robber</a></li>
+      </ul>
+      <h3>Rung 2</h3>
+      <ul class="lc">
+        <li><a href="https://leetcode.com/problems/coin-change/"><b>322</b>Coin Change</a></li>
+        <li><a href="https://leetcode.com/problems/accounts-merge/"><b>721</b>Accounts Merge</a></li>
+        <li><a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/"><b>236</b>LCA</a></li>
+        <li><a href="https://leetcode.com/problems/pacific-atlantic-water-flow/"><b>417</b>Pacific Atlantic</a></li>
+        <li><a href="https://leetcode.com/problems/word-search/"><b>79</b>Word Search</a></li>
+        <li><a href="https://leetcode.com/problems/network-delay-time/"><b>743</b>Network Delay</a></li>
+        <li><a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/"><b>105</b>Build Tree</a></li>
+      </ul>
+      <h3>Rung 3</h3>
+      <ul class="lc">
+        <li><a class="hard" href="https://leetcode.com/problems/binary-tree-maximum-path-sum/"><b>124</b>Max Path Sum</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/word-ladder/"><b>127</b>Word Ladder</a></li>
+        <li><a href="https://leetcode.com/problems/cheapest-flights-within-k-stops/"><b>787</b>Cheapest Flights</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix/"><b>329</b>Increasing Path</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/n-queens/"><b>51</b>N-Queens</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/swim-in-rising-water/"><b>778</b>Swim in Rising Water</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/word-search-ii/"><b>212</b>Word Search II</a></li>
+        <li><a class="hard" href="https://leetcode.com/problems/binary-tree-cameras/"><b>968</b>Cameras</a></li>
+      </ul>
+      <details class="check"><summary>Answer key: which chapter each one belongs to <span class="hint">after you've tried</span></summary><div class="ans"><p><b>Rung 1</b>: 199 level order (4) · 695 flood fill (8) · 39 backtracking, combinations (12) · 230 BST in-order (5) · 207 cycle / topological sort (9) · 198 1-D DP (13).</p><p><b>Rung 2</b>: 322 knapsack DP (13) · 721 Union-Find (10) · 236 two search parties (6) · 417 multi-source flood fill from the oceans (8) · 79 backtracking on a grid with mark/unmark (12) · 743 Dijkstra (11) · 105 building from traversals (6).</p><p><b>Rung 3</b>: 124 report one, record one (6) · 127 BFS on a hidden graph (7) · 787 Bellman-Ford, stops in the state (11, 14) · 329 memoised DFS on a DAG (14) · 51 backtracking with pruning (12) · 778 Dijkstra on the max height, or Union-Find by height (10, 11) · 212 backtracking plus a trie for pruning (12) · 968 tree DP with three states (14).</p></div></details>
+      <h3>Going further</h3>
+      <p>Topics this guide leaves out, for when the above feels automatic: <b>tries</b> (prefix trees, used to prune Word Search II), <b>bridges and articulation points</b> (Tarjan's low-link values: Critical Connections in a Network), <b>Eulerian paths</b> (Hierholzer's algorithm: Reconstruct Itinerary), <b>strongly connected components</b>, <b>segment trees</b> and <b>Fenwick trees</b> for range queries, <b>bidirectional BFS</b>, and <b>A*</b> search.</p>
+      <label class="done-toggle"><input type="checkbox"> I'm done with this chapter</label>
+    </section>
+  </main>
+</div>
+
+<script src="viz.js"></script>
+<script>
+(function () {
+  // Contents, built from the chapters on the page.
+  const toc = document.getElementById('toc');
+  let group = null;
+  document.querySelectorAll('main > .part, main > section.ch[data-ch]').forEach((el) => {
+    if (el.classList.contains('part')) {
+      const k = document.createElement('div');
+      k.className = 'kicker';
+      k.textContent = el.textContent.replace(/^Part [IVX]+ · /, '');
+      toc.appendChild(k);
+      group = document.createElement('ul');
+      group.className = 'chs';
+      toc.appendChild(group);
+      return;
+    }
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + el.id;
+    a.dataset.ch = el.dataset.ch;
+    a.innerHTML = '<span class="n"><span>' + el.dataset.ch.padStart(2, '0') + '</span></span>' + el.querySelector('h2').textContent;
+    li.appendChild(a);
+    group.appendChild(li);
+  });
+
+  // Progress, remembered in this browser only.
+  const KEY = 'trees-graphs-chapters';
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+  const write = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+  const chapters = [...document.querySelectorAll('section.ch[data-ch]')];
+  function paint() {
+    const done = read();
+    chapters.forEach((s) => {
+      const on = done.includes(s.dataset.ch);
+      s.classList.toggle('is-done', on);
+      const box = s.querySelector('.done-toggle input');
+      if (box) box.checked = on;
+      document.querySelector('nav.toc a[data-ch="' + s.dataset.ch + '"]')?.classList.toggle('ticked', on);
+    });
+    document.getElementById('progress-text').textContent = done.length + ' of ' + chapters.length + ' chapters done';
+    document.getElementById('progress-bar').style.width = (100 * done.length / chapters.length) + '%';
+  }
+  chapters.forEach((s) => s.querySelector('.done-toggle input')?.addEventListener('change', (e) => {
+    const done = new Set(read());
+    e.target.checked ? done.add(s.dataset.ch) : done.delete(s.dataset.ch);
+    write([...done]);
+    paint();
+  }));
+  paint();
+
+  // Highlight the chapter you're reading.
+  const links = new Map([...document.querySelectorAll('nav.toc a')].map((a) => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    links.forEach((a) => a.classList.remove('active'));
+    links.get(e.target.id)?.classList.add('active');
+  }), { rootMargin: '0px 0px -70% 0px' });
+  chapters.forEach((s) => spy.observe(s));
+
+  // Theme switch: auto → light → dark.
+  const TK = 'trees-graphs-theme', btn = document.getElementById('theme');
+  const modes = ['auto', 'light', 'dark'];
+  let mode = 'auto';
+  try { mode = localStorage.getItem(TK) || 'auto'; } catch {}
+  function apply() {
+    if (mode === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', mode);
+    btn.textContent = 'Theme: ' + mode;
+  }
+  btn.addEventListener('click', () => {
+    mode = modes[(modes.indexOf(mode) + 1) % 3];
+    try { localStorage.setItem(TK, mode); } catch {}
+    apply();
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

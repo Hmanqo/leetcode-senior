@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trees &amp; Graphs Lab</title>
+<meta name="description" content="Every step-through animation from the Trees & Graphs guide, in one place.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .lab main { max-width: 860px; }
+  .lab h1 { font-size: 34px; margin: 4px 0 6px; }
+  .lab .lede { font-size: 17px; margin-bottom: 18px; }
+  .lab nav.toc a { cursor: pointer; }
+  .blurb { font-size: 15.5px; color: var(--muted); margin: 0 0 14px; }
+  .blurb a { white-space: nowrap; }
+  .keys { font-size: 13px; color: var(--muted); margin-top: -6px; }
+  .keys kbd { font: 600 11.5px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+  @media (max-width: 920px) { .lab nav.toc .chs { display: block; } }
+</style>
+</head>
+<body class="lab">
+<div class="layout">
+  <nav class="toc" aria-label="Animations">
+    <a href="lesson.html" style="margin:0 0 8px">← Back to the guide</a>
+    <div id="list"></div>
+  </nav>
+  <main>
+    <div class="hero" style="padding-bottom:18px">
+      <div class="kicker">Trees &amp; Graphs · the lab</div>
+      <h1 id="title">Lab</h1>
+      <p class="lede" id="blurb"></p>
+      <p class="keys">Click the animation, then <kbd>→</kbd> steps forward, <kbd>←</kbd> steps back, <kbd>space</kbd> plays and pauses.</p>
+    </div>
+    <div id="stage"></div>
+  </main>
+</div>
+<script src="viz.js"></script>
+<script>
+(function () {
+  const GROUPS = [
+    ['Trees', [
+      ['depth', 'Maximum depth', 'Answers flow up from the leaves. No node answers until its children have.', 3],
+      ['traverse', 'Pre / in / post-order', 'One walk around the tree, three moments to write a node down.', 4],
+      ['level', 'Level order', 'A queue sweeps the tree floor by floor.', 4],
+      ['bst', 'BST search', 'Each comparison throws away a whole side of the tree.', 5],
+      ['validate', 'Validate a BST', 'A window passed down from every ancestor catches what a parent check misses.', 5],
+      ['diameter', 'Diameter', 'Report one arm to your parent, record the path that bends at you.', 6],
+      ['lca', 'Lowest common ancestor', 'Two search parties report up; the node that hears from both sides is the answer.', 6],
+    ]],
+    ['Graphs', [
+      ['bfs', 'BFS and DFS', 'Ripples versus one explorer with string. Same graph, very different trails.', 7],
+      ['islands', 'Number of islands', 'A grid is a graph; flood fill is the paint bucket.', 8],
+      ['oranges', 'Multi-source BFS', 'Drop every stone in the pond at once.', 8],
+      ['kahn', 'Topological sort', 'Getting dressed: whatever is waiting for nothing goes next.', 9],
+      ['colors', 'Cycle detection', 'Grey footprints mark the trail you are on now. Stepping on one means a loop.', 9],
+      ['uf', 'Union-Find', 'Clubs, presidents, and the two tricks that make it nearly instant.', 10],
+      ['dijkstra', 'Dijkstra', 'Always settle the closest unsettled place. Old tickets get thrown away.', 11],
+    ]],
+    ['Search and memory', [
+      ['subsets', 'Subsets', 'Choose, explore, un-choose, on a decision tree that is never built.', 12],
+      ['queens', '4 queens', 'Pruning: skip any square already under attack.', 12],
+      ['fib', 'Memoisation', 'The same question asked again and again, then answered once.', 13],
+      ['griddp', 'Grid DP', 'Each square is the sum of the two it can be reached from.', 13],
+      ['robber', 'Tree DP', 'Each house reports two numbers: robbed and skipped.', 14],
+    ]],
+  ];
+  const all = GROUPS.flatMap(([, xs]) => xs);
+  const list = document.getElementById('list');
+  GROUPS.forEach(([g, xs]) => {
+    const k = document.createElement('div'); k.className = 'kicker'; k.textContent = g; list.appendChild(k);
+    const ul = document.createElement('ul'); ul.className = 'chs'; list.appendChild(ul);
+    xs.forEach(([id, name]) => {
+      const li = document.createElement('li'); const a = document.createElement('a');
+      a.href = '#' + id; a.dataset.id = id; a.textContent = name;
+      li.appendChild(a); ul.appendChild(li);
+    });
+  });
+  const stage = document.getElementById('stage');
+  function show() {
+    const id = location.hash.slice(1);
+    const item = all.find((x) => x[0] === id) || all[0];
+    stage.querySelector('.viz')?._viz?.stop();
+    document.getElementById('title').textContent = item[1];
+    const b = document.getElementById('blurb');
+    b.innerHTML = '';
+    b.append(item[2] + ' ');
+    const a = document.createElement('a');
+    a.href = 'lesson.html#ch' + item[3];
+    a.textContent = 'Read chapter ' + item[3] + ' →';
+    b.appendChild(a);
+    stage.innerHTML = '';
+    const d = document.createElement('div');
+    d.dataset.viz = item[0];
+    stage.appendChild(d);
+    TGViz.mount(d);
+    document.querySelectorAll('#list a').forEach((x) => x.classList.toggle('active', x.dataset.id === item[0]));
+  }
+  window.addEventListener('hashchange', show);
+  show();
+})();
+</script>
+</body>
+</html>
